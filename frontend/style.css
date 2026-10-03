@@ -49,6 +49,7 @@ body {
   font-size: 1.25rem;
   font-weight: 700;
   text-decoration: none;
+  font-family: var(--header-font);
 }
 
 .main-navigation {
@@ -75,7 +76,7 @@ body {
 
 .home-heading {
   padding: clamp(24px, 6vw, 56px);
-  border: 1px solid #dce5da;
+  border: 1px solid var(--green);
   border-radius: 16px;
   background: #fff;
 }
@@ -139,5 +140,107 @@ body {
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+  }
+}
+
+.dashboard-page {
+  min-height: 100vh;
+  padding: 32px 20px;
+  background: var(--background-color);
+  color: var(--text-color);
+  text-align: left;
+  font-family: var(--main-font);
+}
+
+.dashboard-page .container {
+  width: min(100%, 960px);
+  margin-inline: auto;
+}
+
+.dashboard-page h1,
+.dashboard-page h2 {
+  color: var(--text-color);
+  font-family: var(--header-font);
+  font-weight: 400;
+}
+
+.dashboard-page h1 {
+  margin: 0 0 16px;
+  font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.dashboard-page h2 {
+  margin-top: 40px;
+  font-size: 1.35rem;
+}
+
+.dashboard-page #status {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid var(--green);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.dashboard-page button {
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent-color);
+  color: var(--text-color);
+  font-family: var(--main-font);
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.dashboard-page button:hover,
+.dashboard-page button:focus-visible {
+  background: var(--primary-color);
+}
+
+.dashboard-page .section {
+  margin-bottom: 0;
+  border-radius: 16px;
+}
+
+.dashboard-page .data-box {
+  background: var(--green2);
+  border: 1px solid #dce5da;
+  border-radius: 16px;
+  line-height: 1.6;
+  padding: 2%;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+.dashboard-page .label {
+  color: var(--text-color);
+}
+
+.dashboard-page .impact-card {
+  margin-top: 10px;
+}
+
+.dashboard-page .large-value {
+  color: var(--primary-color);
+}
+
+.dashboard-page canvas {
+  display: block;
+  border-color: var(--green);
+}
+
+.dashboard-page #serialOutput {
+  height: 260px;
+  border: 1px solid #26372d;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .dashboard-page {
+    padding: 24px 16px;
+  }
+
+  .dashboard-page .data-grid {
+    grid-template-columns: 1fr;
   }
 }
