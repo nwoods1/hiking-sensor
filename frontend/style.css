@@ -236,13 +236,16 @@ body {
 
 .dashboard-page canvas {
   display: block;
-  border-color: var(--green);
+  border: 2px solid var(--green2);
+  border-radius: 5px;
 }
 
 .dashboard-page #serialOutput {
   height: 260px;
-  border: 1px solid #26372d;
+  border: 2px solid var(--green2);
   line-height: 1.5;
+  padding-top: 2%;
+  padding-left: 2%;
 }
 
 @media (max-width: 600px) {
