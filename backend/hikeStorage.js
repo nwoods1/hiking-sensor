@@ -1,6 +1,6 @@
 // hikeStorage.js
-import { supabase } from './supabase';
-import { computeStats } from './stats';
+import { supabase } from './supabase.js';
+import { computeStats } from './stats.js';
 
 async function gzipJson(obj) {
   const stream = new Blob([JSON.stringify(obj)]).stream()

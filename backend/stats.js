@@ -25,7 +25,7 @@ export function computeStats(impacts, {
         duration_s: Math.round(durationMs/1000),
         step_threshold: stepThreshold,
         high_impact_threshold: highThreshold,
-        step_cound:n,
+        step_count:n,
     };
 
     // No impacts recorded return 
@@ -38,9 +38,9 @@ export function computeStats(impacts, {
     let activeMs = 0;
     const pauses = [];
     for (let i = 1; i<n; i++){
-        const gap = impact[i].t - impacts[i-1].t;
+        const gap = impacts[i].t - impacts[i-1].t;
 
-        if (gap > pause){
+        if (gap > pauseGapMs){
             pauses.push({start_s: Math.round(impacts[i-1].t/1000), 
                 length_s: Math.round(gap/1000)});
         }else{
