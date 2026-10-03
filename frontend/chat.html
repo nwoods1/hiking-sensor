@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Hiking Data Assistant</title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chango&family=Clarity+City:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+
+<body class="home-page">
+
+  <header>
+
+    <a
+      href="index.html"
+      class="header-section"
+    >
+      Hiking Sensor
+    </a>
+
+    <nav class="main-navigation">
+
+      <a href="index.html">
+        Home
+      </a>
+
+      <a href="index.html#about">
+        About
+      </a>
+
+      <a href="dashboard.html">
+        Dashboard
+      </a>
+
+      <a href="chat.html">
+        AI Assistant
+      </a>
+
+    </nav>
+
+  </header>
+
+
+  <main>
+
+    <section class="home-heading">
+
+      <h1>
+        Hiking Data Assistant
+      </h1>
+
+      <p>
+        Ask questions about your recorded hiking sessions,
+        knee angles, impacts, cadence, fatigue, and other
+        sensor statistics.
+      </p>
+
+    </section>
+
+
+    <section class="chat-container">
+
+      <div
+        id="chatMessages"
+        class="chat-messages"
+      >
+
+        <div class="message assistant-message">
+
+          <div class="message-label">
+            Hiking Assistant
+          </div>
+
+          <div class="message-content">
+            Hi! Ask me a question about your hiking data.
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="suggested-questions">
+
+        <button
+          class="suggestion"
+          type="button"
+          data-question="Which hike had the highest maximum impact?"
+        >
+          Highest impact
+        </button>
+
+        <button
+          class="suggestion"
+          type="button"
+          data-question="Which hike had the lowest average knee angle at impact?"
+        >
+          Lowest knee angle
+        </button>
+
+        <button
+          class="suggestion"
+          type="button"
+          data-question="Compare the fatigue ratio across all hikes."
+        >
+          Compare fatigue
+        </button>
+
+        <button
+          class="suggestion"
+          type="button"
+          data-question="Which hike looks the most physically demanding based on the data?"
+        >
+          Most demanding hike
+        </button>
+
+      </div>
+
+
+      <form
+        id="chatForm"
+        class="chat-form"
+      >
+
+        <textarea
+          id="questionInput"
+          rows="2"
+          placeholder="Ask about your hiking data..."
+          required
+        ></textarea>
+
+        <button
+          id="sendButton"
+          type="submit"
+        >
+          Ask
+        </button>
+
+      </form>
+
+
+      <p
+        id="chatStatus"
+        class="chat-status"
+      ></p>
+
+    </section>
+
+  </main>
+
+
+  <footer>
+
+    <p>
+      Hiking Sensor
+    </p>
+
+  </footer>
+
+
+  <script src="chat.js"></script>
+
+</body>
+
+</html>
