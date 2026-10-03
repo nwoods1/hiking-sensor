@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hike details and recorded information.">
+    <title>Hike Details | Hiking Sensor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chango&family=Clarity+City:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+<body class="app-page" data-require-auth>
+    <header class="app-header">
+        <a class="brand" href="index.html">Hiking Sensor</a>
+        <nav class="app-navigation" aria-label="Main navigation">
+            <a href="dashboard.html">Your hikes</a>
+        </nav>
+    </header>
+    <main class="app-main narrow-main">
+        <a class="back-link" href="dashboard.html">← Back to your hikes</a>
+        <section class="panel">
+            <p class="eyebrow">Hike details</p>
+            <h1 id="detail-name">Hike</h1>
+            <p id="detail-message" class="notice" role="status" aria-live="polite"></p>
+            <dl id="hike-details" class="detail-grid"></dl>
+            <p class="muted">Sensor measurements can be added here when hike data recording is connected.</p>
+        </section>
+    </main>
+    <script src="supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js" defer></script>
+    <script src="hike-store.js" defer></script>
+    <script src="hike-detail.js" defer></script>
+</body>
+</html>
