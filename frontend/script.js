@@ -1,3 +1,5 @@
+let kneeZeroOffset = 0;
+
 
 "use strict";
 
@@ -428,11 +430,28 @@ function calculateKneeAngle(thigh, shin, dt) {
 
   // Relative thigh/shin orientation.
 
-  kneeAngle = Math.abs(
-    normalizeAngle(thighAngle - shinAngle)
+  const relativeAngle = normalizeAngle(
+  thighAngle - shinAngle
+);
+
+kneeAngle = Math.abs(
+  normalizeAngle(relativeAngle - kneeZeroOffset)
+);
+
+return kneeAngle;
+
+}
+
+function calibrateKnee() {
+
+  kneeZeroOffset = normalizeAngle(
+    thighAngle - shinAngle
   );
 
-  return kneeAngle;
+  console.log(
+    "Knee calibrated. Offset:",
+    kneeZeroOffset
+  );
 
 }
 
@@ -1108,8 +1127,17 @@ window.hikingActivity = {
 
   summary: getActivitySummary,
 
+  calibrate: calibrateKnee,
+
   getReadings: () => activity.readings,
 
-  getFootStrikes: () => activity.footStrikes
+  getFootStrikes: () => activity.footStrikes,
+
+  getAngles: () => ({
+  thighAngle,
+  shinAngle,
+  kneeAngle,
+  kneeZeroOffset
+}),
 
 };
