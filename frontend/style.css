@@ -189,12 +189,15 @@ body {
   color: var(--text-color);
   font-family: var(--main-font);
   font-weight: 700;
-  padding: 8px 12px;
+  padding: 10px;
+  transition: transform 0.3s ease, background 0.3s;
 }
 
 .dashboard-page button:hover,
 .dashboard-page button:focus-visible {
   background: var(--primary-color);
+  transform: translateY(-0.5px);
+
 }
 
 .dashboard-page .section {
@@ -210,6 +213,13 @@ body {
   padding: 2%;
   border-radius: 5px;
   margin-top: 5px;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.dashboard-page .data-box:hover {
+  transform: translateY(-1.5px);
+  background-color: var(--green);
+
 }
 
 .dashboard-page .label {
