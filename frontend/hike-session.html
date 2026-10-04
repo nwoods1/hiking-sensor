@@ -17,7 +17,7 @@
             <a href="dashboard.html">Your hikes</a>
         </nav>
     </header>
-    <main class="app-main narrow-main">
+    <main class="app-main">
         <a class="back-link" href="new-hike.html">← Edit hike name</a>
         <section class="panel">
             <p class="eyebrow">Ready when you are</p>
@@ -25,7 +25,7 @@
             <p id="session-created-at" class="muted"></p>
             <div class="connection-panel">
                 <h2>Connect your sensor</h2>
-                <p id="connection-status" class="notice" role="status" aria-live="polite">Connect to your ESP32 before starting the timer.</p>
+                <p id="status" class="notice" role="status" aria-live="polite">Connect to your ESP32 before starting the timer.</p>
                 <button id="connect-sensor" type="button">Connect to ESP32</button>
             </div>
             <div class="timer-panel" aria-live="polite">
@@ -38,11 +38,49 @@
                 <button id="finish-hike" type="button" class="button-secondary" hidden>Finish hike</button>
             </div>
         </section>
+
+        <section id="hike-live-data" class="live-data-grid" hidden aria-label="Live hike sensor data">
+            <section class="panel live-values">
+                <h2>Live Sensor Data</h2>
+                <div class="data-grid">
+                    <div class="data-box"><span class="label">Knee angle:</span> <span id="knee">0.00</span>°</div>
+                    <div class="data-box"><span class="label">Acceleration:</span> <span id="acceleration">0.000</span> g</div>
+                    <div class="data-box"><span class="label">Impact acceleration:</span> <span id="impact">0.000</span> g</div>
+                    <div class="data-box"><span class="label">Impact detected:</span> <span id="impactDetected">NO</span></div>
+                    <div class="data-box"><span class="label">Last impact knee angle:</span> <span id="impactKnee">0.00</span>°</div>
+                    <div class="data-box"><span class="label">Last impact strength:</span> <span id="impactStrength">0.000</span> g</div>
+                </div>
+            </section>
+
+            <section class="panel impact-card">
+                <h2>Last Foot Strike</h2>
+                <div class="large-value"><span id="impactKneeLarge">--</span>°</div>
+                <p>Knee flexion at impact</p>
+                <div class="large-value"><span id="impactStrengthLarge">--</span> g</div>
+                <p>Impact acceleration</p>
+            </section>
+
+            <section class="panel graph-panel">
+                <h2>Live Knee Angle</h2>
+                <canvas id="kneeGraph" width="700" height="250"></canvas>
+            </section>
+
+            <section class="panel graph-panel">
+                <h2>Live Impact Acceleration</h2>
+                <canvas id="impactGraph" width="700" height="250"></canvas>
+            </section>
+
+            <section class="panel log-panel">
+                <h2>Live Sensor Log</h2>
+                <div id="serialOutput">Waiting for sensor data...</div>
+            </section>
+        </section>
     </main>
     <script src="supabase-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="auth.js" defer></script>
     <script src="hike-store.js" defer></script>
+    <script src="script.js" defer></script>
     <script src="hike-flow.js" defer></script>
 </body>
 </html>

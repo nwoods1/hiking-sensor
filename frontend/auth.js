@@ -10,6 +10,20 @@
     const authMessage = document.getElementById("auth-message");
     const signOutButton = document.querySelector("[data-sign-out]");
     const accountMessage = document.getElementById("account-message");
+    const authDialog = document.getElementById("sign-in");
+    const openAuthButton = document.querySelector("[data-open-auth]");
+    const closeAuthButton = document.querySelector("[data-close-auth]");
+    const openAuthDialog = () => {
+        if (authDialog && !authDialog.open) authDialog.showModal();
+    };
+
+    openAuthButton?.addEventListener("click", openAuthDialog);
+    closeAuthButton?.addEventListener("click", () => authDialog?.close());
+    authDialog?.addEventListener("click", (event) => {
+        if (event.target === authDialog) authDialog.close();
+    });
+    if (window.location.hash === "#sign-in") openAuthDialog();
+
     const showMessage = (message, isError = false) => {
         if (!authMessage) return;
         authMessage.textContent = message;

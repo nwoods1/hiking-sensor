@@ -22,11 +22,11 @@ const serialOutput = document.getElementById("serialOutput");
 
 const kneeCanvas = document.getElementById("kneeGraph");
 
-const kneeCtx = kneeCanvas.getContext("2d");
+const kneeCtx = kneeCanvas?.getContext("2d");
 
 const impactCanvas = document.getElementById("impactGraph");
 
-const impactCtx = impactCanvas.getContext("2d");
+const impactCtx = impactCanvas?.getContext("2d");
 
 // Store the last 250 readings.
 //
@@ -52,7 +52,8 @@ const serialLines = [];
 // CONNECT BUTTON
 // =====================================================
 
-connectButton.addEventListener("click", connectToESP32);
+connectButton?.addEventListener("click", connectToESP32);
+window.HikingSensor = { connectToESP32 };
 
 // =====================================================
 // CONNECT TO ESP32
@@ -84,10 +85,12 @@ async function connectToESP32() {
     );
 
     statusText.textContent = "Connected to " + (device.name || "ESP32");
+    return device;
   } catch (error) {
     console.error(error);
 
     statusText.textContent = "Connection failed: " + error.message;
+    return null;
   }
 }
 
@@ -125,30 +128,40 @@ function handleSensorData(event) {
   // UPDATE LIVE NUMBERS
   // ===================================================
 
-  document.getElementById("knee").textContent = kneeAngle.toFixed(2);
+  const kneeValue = document.getElementById("knee");
+  if (kneeValue) kneeValue.textContent = kneeAngle.toFixed(2);
 
-  document.getElementById("acceleration").textContent = acceleration.toFixed(3);
+  const accelerationValue = document.getElementById("acceleration");
+  if (accelerationValue) accelerationValue.textContent = acceleration.toFixed(3);
 
-  document.getElementById("impact").textContent = impact.toFixed(3);
+  const impactValue = document.getElementById("impact");
+  if (impactValue) impactValue.textContent = impact.toFixed(3);
 
-  document.getElementById("impactDetected").textContent =
-    impactDetected === 1 ? "YES" : "NO";
+  const impactDetectedValue = document.getElementById("impactDetected");
+  if (impactDetectedValue) {
+    impactDetectedValue.textContent = impactDetected === 1 ? "YES" : "NO";
+  }
 
-  document.getElementById("impactKnee").textContent = impactKnee.toFixed(2);
+  const impactKneeValue = document.getElementById("impactKnee");
+  if (impactKneeValue) impactKneeValue.textContent = impactKnee.toFixed(2);
 
-  document.getElementById("impactStrength").textContent =
-    impactStrength.toFixed(3);
+  const impactStrengthValue = document.getElementById("impactStrength");
+  if (impactStrengthValue) {
+    impactStrengthValue.textContent = impactStrength.toFixed(3);
+  }
 
   // ===================================================
   // NEW FOOT STRIKE
   // ===================================================
 
   if (impactDetected === 1) {
-    document.getElementById("impactKneeLarge").textContent =
-      impactKnee.toFixed(1);
+    const impactKneeLarge = document.getElementById("impactKneeLarge");
+    if (impactKneeLarge) impactKneeLarge.textContent = impactKnee.toFixed(1);
 
-    document.getElementById("impactStrengthLarge").textContent =
-      impactStrength.toFixed(2);
+    const impactStrengthLarge = document.getElementById("impactStrengthLarge");
+    if (impactStrengthLarge) {
+      impactStrengthLarge.textContent = impactStrength.toFixed(2);
+    }
   }
 
   // ===================================================
@@ -176,13 +189,17 @@ function handleSensorData(event) {
   // DRAW KNEE GRAPH
   // ===================================================
 
-  drawGraph(kneeCanvas, kneeCtx, kneeData, impactMarkers, 120, "deg");
+  if (kneeCanvas && kneeCtx) {
+    drawGraph(kneeCanvas, kneeCtx, kneeData, impactMarkers, 120, "deg");
+  }
 
   // ===================================================
   // DRAW IMPACT GRAPH
   // ===================================================
 
-  drawGraph(impactCanvas, impactCtx, impactData, impactMarkers, 3, "g");
+  if (impactCanvas && impactCtx) {
+    drawGraph(impactCanvas, impactCtx, impactData, impactMarkers, 3, "g");
+  }
 
   // ===================================================
   // SERIAL-STYLE LOG
@@ -216,9 +233,10 @@ function handleSensorData(event) {
     serialLines.shift();
   }
 
-  serialOutput.textContent = serialLines.join("\n");
-
-  serialOutput.scrollTop = serialOutput.scrollHeight;
+  if (serialOutput) {
+    serialOutput.textContent = serialLines.join("\n");
+    serialOutput.scrollTop = serialOutput.scrollHeight;
+  }
 }
 
 // =====================================================

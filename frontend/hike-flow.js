@@ -1,14 +1,13 @@
 (() => {
-    const UUID_SERVICE = "12345678-1234-1234-1234-1234567890ab";
-    const UUID_CHARACTERISTIC = "abcdefab-1234-5678-1234-abcdefabcdef";
     const form = document.getElementById("new-hike-form");
     const sessionName = document.getElementById("session-hike-name");
     const connectButton = document.getElementById("connect-sensor");
     const startButton = document.getElementById("start-hike");
     const finishButton = document.getElementById("finish-hike");
-    const connectionStatus = document.getElementById("connection-status");
+    const connectionStatus = document.getElementById("status");
     const timerStatus = document.getElementById("timer-status");
     const timerDisplay = document.getElementById("hike-timer");
+    const liveData = document.getElementById("hike-live-data");
     let device;
     let startedAt;
     let timerId;
@@ -67,16 +66,12 @@
         connectButton.disabled = true;
         showConnectionMessage("Searching for your ESP32…");
         try {
-            device = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,
-                optionalServices: [UUID_SERVICE]
-            });
+            device = await window.HikingSensor.connectToESP32();
+            if (!device) {
+                connectButton.disabled = false;
+                return;
+            }
             device.addEventListener("gattserverdisconnected", handleDisconnect);
-            const server = await device.gatt.connect();
-            const service = await server.getPrimaryService(UUID_SERVICE);
-            const characteristic = await service.getCharacteristic(UUID_CHARACTERISTIC);
-            await characteristic.startNotifications();
-            characteristic.addEventListener("characteristicvaluechanged", () => {});
             showConnectionMessage(`Connected to ${device.name || "ESP32"}. You can start your hike.`);
             startButton.disabled = false;
         } catch (error) {
@@ -100,6 +95,7 @@
         finishButton.hidden = false;
         connectButton.disabled = true;
         timerStatus.textContent = "Hike in progress.";
+        liveData.hidden = false;
         timerId = window.setInterval(updateTimer, 1000);
         updateTimer();
     });

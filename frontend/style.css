@@ -54,6 +54,8 @@ body {
 
 .main-navigation {
   display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 20px;
 }
 
@@ -61,6 +63,8 @@ body {
   color: var(--text-color);
   font-weight: 600;
   text-decoration: none;
+  font-family: var(--main-font);
+  font-size: 2vh;
 }
 
 .main-navigation a:hover,
@@ -259,9 +263,86 @@ body {
 }
 
 .auth-card {
+  width: min(100%, 520px);
+  box-sizing: border-box;
+  padding: clamp(24px, 5vw, 40px);
   border: 1px solid var(--green);
   border-radius: 16px;
   background: #fff;
+}
+
+.auth-dialog {
+  width: min(calc(100% - 32px), 560px);
+  max-width: 560px;
+  max-height: min(90vh, 760px);
+  padding: 0;
+  overflow: auto;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--text-color);
+}
+
+.auth-dialog::backdrop {
+  background: rgb(25 35 29 / 58%);
+  backdrop-filter: blur(3px);
+}
+
+.auth-dialog .auth-card {
+  width: 100%;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 20%);
+}
+
+.auth-dialog-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.auth-dialog-heading h2 {
+  margin: 0;
+  color: var(--text-color);
+  font-family: var(--header-font);
+  font-size: 1.35rem;
+  font-weight: 400;
+}
+
+.auth-dialog .dialog-close {
+  flex: 0 0 40px;
+  width: 40px;
+  min-height: 40px;
+  margin-top: -8px;
+  margin-right: -8px;
+  padding: 0;
+  border: 1px solid var(--green);
+  border-radius: 50%;
+  background: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.auth-dialog .dialog-close:hover {
+  background: var(--green2);
+}
+
+.nav-auth-button {
+  border: 0;
+  background: var(--accent-color);
+  border-radius: 8px;
+  color: var(--text-color);
+  cursor: pointer;
+  font-family: var(--main-font);
+  font-weight: 700;
+  padding: 10px;
+  font-size: 14px;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.nav-auth-button:hover,
+.nav-auth-button:focus-visible {
+  transform: translateY(-0.5px);
+  background-color: var(--primary-color);
 }
 
 .app-page {
@@ -452,6 +533,74 @@ body {
   display: none !important;
 }
 
+.live-data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.live-values,
+.log-panel {
+  grid-column: 1 / -1;
+}
+
+.live-data-grid h2 {
+  margin-top: 0;
+}
+
+.live-data-grid .data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.live-data-grid .data-box {
+  padding: 14px;
+  border: 1px solid var(--green);
+  border-radius: 10px;
+  background: var(--green2);
+  line-height: 1.6;
+}
+
+.live-data-grid .label {
+  font-weight: 700;
+}
+
+.live-data-grid .impact-card {
+  background: var(--green2);
+}
+
+.live-data-grid .large-value {
+  margin: 12px 0 4px;
+  color: #526957;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.live-data-grid .graph-panel canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 2px solid var(--green);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.live-data-grid #serialOutput {
+  min-height: 180px;
+  max-height: 300px;
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid #26372d;
+  border-radius: 8px;
+  background: #111;
+  color: #b8f2cf;
+  font-family: monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
 .button-secondary {
   border: 1px solid var(--green) !important;
   background: #fff !important;
@@ -588,5 +737,10 @@ body {
   .form-actions button,
   .form-actions .button-link {
     width: 100%;
+  }
+
+  .live-data-grid,
+  .live-data-grid .data-grid {
+    grid-template-columns: 1fr;
   }
 }
