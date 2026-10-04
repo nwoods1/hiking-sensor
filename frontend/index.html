@@ -47,21 +47,104 @@
       <section id="about" class="about-heading">
         <h2 id="about-heading">About the project</h2>
         <p>
-          Hiking Sensor uses an ESP32 and motion sensors to explore how the body
-          moves on the trail. The dashboard can display knee angle,
-          acceleration, and detected impacts in real time.
+          Going downhill puts a lot of load on your knees, especially when you
+          land on a nearly straight leg instead of letting the knee bend to
+          absorb the step. Soft Step is a wearable that measures how you land
+          on every step, so you can see when your technique gets stiff and
+          adjust it.
         </p>
+        <p>
+          Two motion sensors, one above the knee and one below it, connect to
+          an ESP32 that streams their readings to this website over Bluetooth.
+          The website combines the readings to work out your knee angle and
+          the impact of each foot strike as you hike.
+        </p>
+        <ul class="about-features">
+          <li>
+            <strong>Live data:</strong> see your knee angle, impact, and step
+            count while you hike.
+          </li>
+          <li>
+            <strong>Landing review:</strong> after each hike, every step is
+            graphed, and landings with a high impact on a nearly straight knee
+            are highlighted.
+          </li>
+          <li>
+            <strong>Your hike history:</strong> hikes are saved to your account
+            so you can compare them over time.
+          </li>
+          <li>
+            <strong>AI assistant:</strong> ask questions about your hikes in
+            plain language, like which hike was hardest on your knees.
+          </li>
+        </ul>
+
       </section>
 
-      <section id="calculations" class="about-heading">
-        <h2 id="calculations-heading">Calculations</h2>
-        <p>
-          We calculate the magnitude of acceleration measured by the shin sensor
-          and compare its deviation from 1g against a predefined threshold to
-          detect potential foot strikes. At each detected impact, we record the
-          corresponding knee angle and impact magnitude.
+      <section id="how-to-use" class="about-heading">
+      <h2 id="how-to-use-heading">How to use Soft Step</h2>
+
+      <div class="how-to-layout">
+        <p class="how-to-intro">
+          Before connecting the device, strap both sensors securely to your leg
+          using the placement shown in the diagram
+          <span class="placement-hint-wide">to the side</span><span class="placement-hint-narrow">below</span>.
+          One sensor should sit above the knee on the thigh, and the other
+          should sit below the knee on the shin.
         </p>
-      </section>
+
+        <figure class="sensor-placement">
+          <img
+            src="tutorial.png"
+            width="2000"
+            height="2000"
+            loading="lazy"
+            decoding="async"
+            alt="Drawing of a leg with the ESP32 and thigh sensor strapped above the knee and the shin sensor strapped below it"
+            class="sensor-placement-image"
+          />
+          <figcaption>
+            ESP32 and thigh sensor above the knee; shin sensor below it.
+          </figcaption>
+        </figure>
+
+        <ol class="how-to-steps">
+          <li>
+            Strap the device onto your leg before connecting it to the website.
+          </li>
+  
+          <li>
+            Open the hike page and connect to the Soft Step sensor using Bluetooth.
+          </li>
+  
+          <li>
+            Before starting the hike, stand with your leg fully straight.
+            The system uses this position to calibrate a straight leg as 180 degrees.
+          </li>
+  
+          <li>
+            Start the hike while keeping your leg straight during the initial
+            calibration.
+          </li>
+  
+          <li>
+            Once the website shows that the sensor is connected and the hike has
+            started, begin hiking normally.
+          </li>
+  
+          <li>
+            During the descent, Soft Step tracks your knee angle and landing
+            acceleration to help identify changes in your technique.
+          </li>
+  
+          <li>
+            Finish the hike in the app to save your data and review your landing
+            technique afterward.
+          </li>
+        </ol>
+      </div>
+    </section>
+
 
 <!-- FAQ SECTION -->
 <section id="faq" class="about-heading">

@@ -140,8 +140,8 @@ img {
 
 .home-page main {
   display: grid;
-  gap: 24px;
-  padding-block: 32px 56px;
+  gap: 12px;
+  padding-block: 24px 40px;
 }
 
 .home-heading {
@@ -152,7 +152,7 @@ img {
 }
 
 .about-heading {
-  padding: clamp(24px, 6vw, 56px);
+  padding: clamp(16px, 4vw, 32px);
 }
 
 .home-heading {
@@ -195,6 +195,111 @@ img {
   font-family: var(--header-font);
   border-bottom: 3px solid var(--secondary-color);
   padding-bottom: 10px;
+}
+
+/* About section */
+
+.about-features {
+  max-width: 65ch;
+  margin: 16px 0;
+  padding-left: 1.25rem;
+  line-height: 1.7;
+}
+
+.about-features li + li {
+  margin-top: 6px;
+}
+
+.about-note {
+  color: #66736a;
+  font-size: 0.9rem;
+}
+
+/* How to use: text on the left, sensor placement drawing on the right */
+
+.how-to-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(180px, 30%, 260px);
+  /* intro row keeps its own height; the steps row takes any extra
+     height from the taller picture, so no gap opens under the intro */
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "intro figure"
+    "steps figure";
+  align-items: start;
+  column-gap: 32px;
+}
+
+.how-to-intro {
+  grid-area: intro;
+  margin-top: 0;
+}
+
+.how-to-layout .how-to-steps {
+  grid-area: steps;
+  margin: 0;
+}
+
+.sensor-placement {
+  grid-area: figure;
+  margin: 0;
+}
+
+.sensor-placement-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--green);
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* the intro says "to the side" beside the picture, "below" when stacked */
+.placement-hint-narrow {
+  display: none;
+}
+
+/* phones: stack as intro, picture, steps */
+@media (max-width: 640px) {
+  .how-to-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas:
+      "intro"
+      "figure"
+      "steps";
+  }
+
+  .sensor-placement {
+    width: min(100%, 220px);
+    margin: 0 auto 20px;
+  }
+
+  .placement-hint-wide {
+    display: none;
+  }
+
+  .placement-hint-narrow {
+    display: inline;
+  }
+}
+
+.sensor-placement figcaption {
+  margin-top: 8px;
+  color: #66736a;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.how-to-steps {
+  max-width: 65ch;
+  padding-left: 1.25rem;
+  line-height: 1.7;
+}
+
+.how-to-steps li + li {
+  margin-top: 8px;
 }
 
 footer {
@@ -1154,7 +1259,7 @@ app-page b
    ======================================== */
 
 #faq {
-  padding: clamp(24px, 6vw, 56px);
+  padding: clamp(16px, 4vw, 32px);
 }
 
 /* Individual FAQ dropdown cards */
