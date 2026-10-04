@@ -1,6 +1,9 @@
-# Hiking Sensor
+# Soft Steps
+Soft Steps is a web app for recording hiking biomechanics data from an ESP32-based sensor, storing hike summaries in Supabase, and asking AI questions about your recorded hikes.
 
-Hiking Sensor is a web app for recording hiking biomechanics data from an ESP32-based sensor, storing hike summaries in Supabase, and asking AI questions about your recorded hikes.
+## Hardware Requirements
+- ESP32
+- 2 x IMU
 
 ## What the project includes
 
