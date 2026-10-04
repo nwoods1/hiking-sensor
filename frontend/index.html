@@ -24,6 +24,7 @@
       <nav class="main-navigation">
         <a href="#home">Home</a>
         <a href="#about">About</a>
+        <a href="#faq">FAQ</a>
         <a href="dashboard.html">Dashboard</a>
         <a href="chat.html">AI Assistant</a>
         <button type="button" class="nav-auth-button" data-open-auth>
@@ -33,7 +34,6 @@
     </header>
 
     <main>
-      
       <section id="home" class="home-heading">
         <h1 id="home-heading">Soft Step</h1>
         <p>
@@ -54,8 +54,86 @@
 
       <section id="calculations" class="about-heading">
         <h2 id="calculations-heading">Calculations</h2>
-        <p>lalalalalala</p>
+        <p>
+          We calculate the magnitude of acceleration measured by the shin sensor
+          and compare its deviation from 1g against a predefined threshold to
+          detect potential foot strikes. At each detected impact, we record the
+          corresponding knee angle and impact magnitude.
+        </p>
       </section>
+
+<!-- FAQ SECTION -->
+<section id="faq" class="about-heading">
+  <h2 id="faq-heading">Frequently Asked Questions</h2>
+
+  <details>
+    <summary>How does an accelerometer work?</summary>
+    <p>
+      An accelerometer contains a microscopic suspended mass
+      that responds to acceleration. Even when stationary,
+      it measures approximately 1g because its internal
+      structure supports the mass against Earth's gravity.
+    </p>
+  </details>
+
+  <details>
+    <summary>Why do we need both an accelerometer and a gyroscope?</summary>
+    <p>
+      The accelerometer estimates orientation using gravity,
+      but its readings can be affected by movement. The
+      gyroscope measures angular velocity, but accumulated
+      errors can cause drift over time.
+
+      We combine both measurements using a complementary
+      filter to obtain a more reliable orientation estimate.
+    </p>
+  </details>
+
+  <details>
+    <summary>How do we calculate knee angle?</summary>
+    <p>
+      We attach one motion sensor to the thigh and another
+      to the shin. Using a complementary filter, we estimate
+      the orientation of each sensor and calculate their
+      relative angle.
+
+      The system is calibrated with the leg straight at
+      180 degrees. As the knee bends, the calculated
+      angle decreases.
+    </p>
+  </details>
+
+  <details>
+    <summary>How do we detect foot strikes?</summary>
+    <p>
+      We calculate the acceleration magnitude from the
+      shin-mounted sensor and measure its deviation from
+      the stationary 1g baseline.
+
+      When this deviation exceeds our configured threshold
+      of 0.8g, and the detector's reset and cooldown
+      conditions are satisfied, we register a potential
+      foot strike.
+    </p>
+  </details>
+
+  <details>
+    <summary>How does the ESP32 communicate with the website?</summary>
+    <p>
+      The ESP32 collects measurements from both MPU6050
+      sensors through I2C communication.
+
+      It then packages the measurements into a 24-byte
+      binary packet and transmits them wirelessly using
+      Bluetooth Low Energy (BLE).
+
+      Our website uses the Web Bluetooth API to receive
+      these measurements in real time.
+    </p>
+  </details>
+</section>
+
+
       <dialog
         id="sign-in"
         class="auth-dialog"
