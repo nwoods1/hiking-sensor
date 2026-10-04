@@ -2,11 +2,10 @@ import {
   openDatabase,
   createSession,
   saveReading,
-  endSession,
+  endSession
 } from "./indexedDB.js";
 
 let kneeZeroOffset = 0;
-
 
 ("use strict");
 
@@ -170,9 +169,7 @@ async function startActivity() {
 // STOP ACTIVITY
 // =====================================================
 
-
 async function stopActivity() {
-
   if (!activity.recording) {
     return getActivitySummary();
   }
@@ -186,16 +183,12 @@ async function stopActivity() {
   activeSessionId = null;
 
   try {
-
     if (sessionId !== null) {
       await endSession(sessionId);
       console.log("Database session ended:", sessionId);
     }
-
   } catch (error) {
-
     console.error("Failed to end database session:", error);
-
   }
 
   console.log("Activity stopped.");
@@ -203,7 +196,6 @@ async function stopActivity() {
 
   return summary;
 }
-
 
 // =====================================================
 // RESET PROCESSING STATE
@@ -258,13 +250,10 @@ async function connectToESP32() {
 
     await characteristic.startNotifications();
 
-    characteristic.addEventListener(
-  "characteristicvaluechanged",
-  (event) => {
-    console.log("BLE packet received:", event.target.value);
-    handleSensorData(event);
-  }
-);
+    characteristic.addEventListener("characteristicvaluechanged", (event) => {
+      console.log("BLE packet received:", event.target.value);
+      handleSensorData(event);
+    });
 
     device.addEventListener("gattserverdisconnected", () => {
       statusText.textContent = "Disconnected";
@@ -678,29 +667,21 @@ function handleSensorData(event) {
 
   activity.readings.push(reading);
 
- 
-
-  // ====================================
-  // SAVE REGULAR SAMPLES + DETECTED IMPACTS
-  // ====================================
+  // SAVE DETECTED IMPACTS ONLY
 
   const sessionId = activeSessionId;
 
-  if (sessionId !== null) {
-
+  if (sessionId !== null && impactDetected) {
     saveReading(
       sessionId,
       {
         kneeAngle: kneeAngle,
-        kneeAcceleration: impact
+        kneeAcceleration: impact,
       },
-      impactDetected
+      true,
     ).catch((error) => {
-
-      console.error("Failed to save sensor reading:", error);
-
+      console.error("Failed to save impact:", error);
     });
-
   }
 
   // ====================================
