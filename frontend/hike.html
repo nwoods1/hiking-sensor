@@ -29,16 +29,18 @@
         </section>
 
         <section class="panel" id="step-charts-panel" hidden>
-            <h2>Every 10 steps</h2>
-            <p class="muted">Each point is the average of 10 steps from this hike's saved sensor data. Hover over a chart for details.</p>
+            <h2>Every step</h2>
+            <p class="muted">Each point is one detected step from this hike's saved sensor data. Hover over a chart for details.</p>
             <div id="step-charts-body">
+                <ul id="step-charts-legend" class="chart-legend"></ul>
+                <p id="bad-landing-summary" class="chart-summary"></p>
                 <figure class="chart">
-                    <figcaption>Average impact acceleration</figcaption>
-                    <div id="avg-impact-chart" class="chart-plot"></div>
+                    <figcaption>Impact acceleration</figcaption>
+                    <div id="impact-chart" class="chart-plot"></div>
                 </figure>
                 <figure class="chart">
-                    <figcaption>Average knee angle at impact</figcaption>
-                    <div id="avg-angle-chart" class="chart-plot"></div>
+                    <figcaption>Knee angle at impact</figcaption>
+                    <div id="angle-chart" class="chart-plot"></div>
                 </figure>
             </div>
             <p id="step-charts-message" class="notice" role="status" aria-live="polite"></p>

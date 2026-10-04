@@ -15,7 +15,6 @@ let kneeCalibrated = false;
 // =====================================================
 
 const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab";
-
 const CHARACTERISTIC_UUID = "abcdefab-1234-5678-1234-abcdefabcdef";
 
 // =====================================================
@@ -52,9 +51,7 @@ const MAX_SERIAL_LINES = 100;
 // =====================================================
 
 const statusText = document.getElementById("status");
-
 const connectButton = document.getElementById("connect");
-
 const serialOutput = document.getElementById("serialOutput");
 
 // =====================================================
@@ -62,11 +59,9 @@ const serialOutput = document.getElementById("serialOutput");
 // =====================================================
 
 const kneeCanvas = document.getElementById("kneeGraph");
-
 const kneeCtx = kneeCanvas.getContext("2d");
 
 const impactCanvas = document.getElementById("impactGraph");
-
 const impactCtx = impactCanvas.getContext("2d");
 
 const kneeData = [];
@@ -171,7 +166,9 @@ async function startActivity(details = {}) {
     return activeSessionId;
   } catch (error) {
     activeSessionId = null;
+
     console.error("Failed to start activity:", error);
+
     throw error;
   } finally {
     activityStarting = false;
@@ -200,6 +197,7 @@ async function stopActivity({ completed = false } = {}) {
   try {
     if (sessionId !== null) {
       await endSession(sessionId, { completed });
+
       console.log("Database session ended:", sessionId);
     }
   } catch (error) {
@@ -209,7 +207,10 @@ async function stopActivity({ completed = false } = {}) {
   console.log("Activity stopped.");
   console.table(summary);
 
-  return { ...summary, sessionId };
+  return {
+    ...summary,
+    sessionId
+  };
 }
 
 // =====================================================
@@ -217,7 +218,6 @@ async function stopActivity({ completed = false } = {}) {
 // =====================================================
 
 function resetProcessing() {
-
   kneeZeroOffset = 0;
   kneeCalibrated = false;
 
@@ -249,6 +249,7 @@ function resetProcessing() {
 
 // data.html: start recording as soon as the sensor connects.
 // hike-session.html uses window.HikingSensor instead (see bottom).
+
 connectButton?.addEventListener("click", async () => {
   if (await connectToESP32()) {
     await startActivity();
@@ -257,7 +258,9 @@ connectButton?.addEventListener("click", async () => {
 
 // Returns the connected device, or null if connecting failed.
 async function connectToESP32() {
-  if (new URLSearchParams(window.location.search).get("mockBluetooth") === "1") {
+  if (
+    new URLSearchParams(window.location.search).get("mockBluetooth") === "1"
+  ) {
     const device = createMockDevice();
 
     device.addEventListener("gattserverdisconnected", () => {
@@ -266,50 +269,85 @@ async function connectToESP32() {
       stopActivity();
     });
 
-    statusText.textContent = "Connected to Mock ESP32 (test mode)";
+    statusText.textContent =
+      "Connected to Mock ESP32 (test mode)";
 
     return device;
   }
 
   try {
-    statusText.textContent = "Searching for Bluetooth devices...";
+    statusText.textContent =
+      "Searching for Bluetooth devices...";
 
-    const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
+    const device =
+      await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [
+          SERVICE_UUID
+        ],
+      });
 
-      optionalServices: [SERVICE_UUID],
-    });
+    statusText.textContent =
+      "Connecting...";
 
-    statusText.textContent = "Connecting...";
+    const characteristic =
+      await connectToSensorCharacteristic(
+        device
+      );
 
-    const characteristic = await connectToSensorCharacteristic(device);
+    characteristic.addEventListener(
+      "characteristicvaluechanged",
+      (event) => {
+        console.log(
+          "BLE packet received:",
+          event.target.value
+        );
 
-    characteristic.addEventListener("characteristicvaluechanged", (event) => {
-      console.log("BLE packet received:", event.target.value);
-      handleSensorData(event);
-    });
+        handleSensorData(event);
+      }
+    );
 
-    device.addEventListener("gattserverdisconnected", () => {
-      statusText.textContent = "Disconnected";
+    device.addEventListener(
+      "gattserverdisconnected",
+      () => {
+        statusText.textContent =
+          "Disconnected";
 
-      stopActivity();
-    });
+        stopActivity();
+      }
+    );
 
-    statusText.textContent = "Connected to " + (device.name || "ESP32");
+    statusText.textContent =
+      "Connected to " +
+      (
+        device.name ||
+        "ESP32"
+      );
 
     return device;
   } catch (error) {
     console.error(error);
 
-    if (error.name === "NetworkError") {
+    if (
+      error.name ===
+      "NetworkError"
+    ) {
       statusText.textContent =
         "Connection failed: the ESP32 keeps dropping the connection. " +
         "Make sure no other phone or app is connected to it, restart it, and try again.";
-    } else if (error.name === "NotFoundError" && error.message.includes("Service")) {
+    } else if (
+      error.name ===
+        "NotFoundError" &&
+      error.message.includes(
+        "Service"
+      )
+    ) {
       statusText.textContent =
         "Connection failed: that device isn't the hiking sensor. Pick the ESP32 from the list.";
     } else {
-      statusText.textContent = "Connection failed: " + error.message;
+      statusText.textContent =
+        "Connection failed: " +
+        error.message;
     }
 
     return null;
@@ -327,33 +365,62 @@ async function connectToESP32() {
 
 const MAX_CONNECT_ATTEMPTS = 3;
 
-async function connectToSensorCharacteristic(device) {
-  for (let attempt = 1; ; attempt++) {
+async function connectToSensorCharacteristic(
+  device
+) {
+  for (
+    let attempt = 1;
+    ;
+    attempt++
+  ) {
     try {
-      const server = await device.gatt.connect();
+      const server =
+        await device.gatt.connect();
 
-      const service = await server.getPrimaryService(SERVICE_UUID);
+      const service =
+        await server.getPrimaryService(
+          SERVICE_UUID
+        );
 
-      const characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+      const characteristic =
+        await service.getCharacteristic(
+          CHARACTERISTIC_UUID
+        );
 
       await characteristic.startNotifications();
 
       return characteristic;
     } catch (error) {
-      if (error.name !== "NetworkError" || attempt >= MAX_CONNECT_ATTEMPTS) {
+      if (
+        error.name !==
+          "NetworkError" ||
+        attempt >=
+          MAX_CONNECT_ATTEMPTS
+      ) {
         throw error;
       }
 
-      console.warn(`Connection attempt ${attempt} failed, retrying:`, error);
+      console.warn(
+        `Connection attempt ${attempt} failed, retrying:`,
+        error
+      );
 
       statusText.textContent =
         `Connection dropped, retrying (${attempt + 1}/${MAX_CONNECT_ATTEMPTS})...`;
 
-      if (device.gatt.connected) {
+      if (
+        device.gatt.connected
+      ) {
         device.gatt.disconnect();
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+      await new Promise(
+        (resolve) =>
+          setTimeout(
+            resolve,
+            500 * attempt
+          )
+      );
     }
   }
 }
@@ -369,49 +436,167 @@ async function connectToSensorCharacteristic(device) {
 function createMockDevice() {
   let connected = true;
 
-  const disconnectListeners = new Set();
+  const disconnectListeners =
+    new Set();
 
-  const mockStart = performance.now();
+  const mockStart =
+    performance.now();
 
-  const toRaw = (value, scale) => Math.round(value * scale);
+  const toRaw = (
+    value,
+    scale
+  ) =>
+    Math.round(
+      value * scale
+    );
 
-  const timer = setInterval(() => {
-    const t = (performance.now() - mockStart) / 1000;
+  const timer =
+    setInterval(() => {
+      const t =
+        (
+          performance.now() -
+          mockStart
+        ) /
+        1000;
 
-    const phase = 2 * Math.PI * t;
+      const phase =
+        2 *
+        Math.PI *
+        t;
 
-    // Segment angles (deg) and their rates (deg/s).
-    const thighDeg = 15 * Math.sin(phase);
-    const thighRate = 15 * 2 * Math.PI * Math.cos(phase);
+      // Segment angles (deg) and their rates (deg/s).
+      const thighDeg =
+        15 *
+        Math.sin(
+          phase
+        );
 
-    const shinDeg = thighDeg - 30 - 15 * Math.sin(phase + 1);
-    const shinRate = thighRate - 15 * 2 * Math.PI * Math.cos(phase + 1);
+      const thighRate =
+        15 *
+        2 *
+        Math.PI *
+        Math.cos(
+          phase
+        );
 
-    // Foot strike: short acceleration spike on the shin.
-    const strike = t % 1 < 0.05 ? 2.5 : 1;
+      const shinDeg =
+        thighDeg -
+        30 -
+        15 *
+          Math.sin(
+            phase + 1
+          );
 
-    const packet = new DataView(new ArrayBuffer(24));
+      const shinRate =
+        thighRate -
+        15 *
+          2 *
+          Math.PI *
+          Math.cos(
+            phase + 1
+          );
 
-    const writeSensor = (offset, deg, rate, gravity) => {
-      const rad = deg / RAD_TO_DEG;
+      // Foot strike: short acceleration spike on the shin.
+      const strike =
+        t % 1 < 0.05
+          ? 2.5
+          : 1;
 
-      packet.setInt16(offset, 0, true);
-      packet.setInt16(offset + 2, toRaw(Math.sin(rad) * gravity, ACCEL_SCALE), true);
-      packet.setInt16(offset + 4, toRaw(Math.cos(rad) * gravity, ACCEL_SCALE), true);
+      const packet =
+        new DataView(
+          new ArrayBuffer(
+            24
+          )
+        );
 
-      packet.setInt16(offset + 6, toRaw(rate, GYRO_SCALE), true);
-      packet.setInt16(offset + 8, 0, true);
-      packet.setInt16(offset + 10, 0, true);
-    };
+      const writeSensor =
+        (
+          offset,
+          deg,
+          rate,
+          gravity
+        ) => {
+          const rad =
+            deg /
+            RAD_TO_DEG;
 
-    writeSensor(0, thighDeg, thighRate, 1);
-    writeSensor(12, shinDeg, shinRate, strike);
+          packet.setInt16(
+            offset,
+            0,
+            true
+          );
 
-    handleSensorData({ target: { value: packet } });
-  }, 20);
+          packet.setInt16(
+            offset + 2,
+            toRaw(
+              Math.sin(
+                rad
+              ) *
+                gravity,
+              ACCEL_SCALE
+            ),
+            true
+          );
+
+          packet.setInt16(
+            offset + 4,
+            toRaw(
+              Math.cos(
+                rad
+              ) *
+                gravity,
+              ACCEL_SCALE
+            ),
+            true
+          );
+
+          packet.setInt16(
+            offset + 6,
+            toRaw(
+              rate,
+              GYRO_SCALE
+            ),
+            true
+          );
+
+          packet.setInt16(
+            offset + 8,
+            0,
+            true
+          );
+
+          packet.setInt16(
+            offset + 10,
+            0,
+            true
+          );
+        };
+
+      writeSensor(
+        0,
+        thighDeg,
+        thighRate,
+        1
+      );
+
+      writeSensor(
+        12,
+        shinDeg,
+        shinRate,
+        strike
+      );
+
+      handleSensorData({
+        target: {
+          value:
+            packet
+        }
+      });
+    }, 20);
 
   return {
-    name: "Mock ESP32",
+    name:
+      "Mock ESP32",
 
     gatt: {
       get connected() {
@@ -419,19 +604,36 @@ function createMockDevice() {
       },
 
       disconnect() {
-        if (!connected) return;
+        if (!connected) {
+          return;
+        }
 
         connected = false;
 
-        clearInterval(timer);
+        clearInterval(
+          timer
+        );
 
-        disconnectListeners.forEach((listener) => listener());
+        disconnectListeners.forEach(
+          (
+            listener
+          ) =>
+            listener()
+        );
       },
     },
 
-    addEventListener(type, listener) {
-      if (type === "gattserverdisconnected") {
-        disconnectListeners.add(listener);
+    addEventListener(
+      type,
+      listener
+    ) {
+      if (
+        type ===
+        "gattserverdisconnected"
+      ) {
+        disconnectListeners.add(
+          listener
+        );
       }
     },
   };
@@ -441,32 +643,81 @@ function createMockDevice() {
 // DECODE RAW BLE DATA
 // =====================================================
 
-function decodeSensorData(data) {
+function decodeSensorData(
+  data
+) {
   // New Arduino sends 12 int16_t values.
   // Total packet size = 24 bytes.
 
-  if (data.byteLength !== 24) {
+  if (
+    data.byteLength !==
+    24
+  ) {
     return null;
   }
 
   const thigh = {
-    ax: data.getInt16(0, true),
-    ay: data.getInt16(2, true),
-    az: data.getInt16(4, true),
+    ax: data.getInt16(
+      0,
+      true
+    ),
 
-    gx: data.getInt16(6, true),
-    gy: data.getInt16(8, true),
-    gz: data.getInt16(10, true),
+    ay: data.getInt16(
+      2,
+      true
+    ),
+
+    az: data.getInt16(
+      4,
+      true
+    ),
+
+    gx: data.getInt16(
+      6,
+      true
+    ),
+
+    gy: data.getInt16(
+      8,
+      true
+    ),
+
+    gz: data.getInt16(
+      10,
+      true
+    ),
   };
 
   const shin = {
-    ax: data.getInt16(12, true),
-    ay: data.getInt16(14, true),
-    az: data.getInt16(16, true),
+    ax: data.getInt16(
+      12,
+      true
+    ),
 
-    gx: data.getInt16(18, true),
-    gy: data.getInt16(20, true),
-    gz: data.getInt16(22, true),
+    ay: data.getInt16(
+      14,
+      true
+    ),
+
+    az: data.getInt16(
+      16,
+      true
+    ),
+
+    gx: data.getInt16(
+      18,
+      true
+    ),
+
+    gy: data.getInt16(
+      20,
+      true
+    ),
+
+    gz: data.getInt16(
+      22,
+      true
+    ),
   };
 
   return {
@@ -479,15 +730,33 @@ function decodeSensorData(data) {
 // CONVERT RAW SENSOR VALUES
 // =====================================================
 
-function convertSensorData(raw) {
+function convertSensorData(
+  raw
+) {
   return {
-    ax: raw.ax / ACCEL_SCALE,
-    ay: raw.ay / ACCEL_SCALE,
-    az: raw.az / ACCEL_SCALE,
+    ax:
+      raw.ax /
+      ACCEL_SCALE,
 
-    gx: raw.gx / GYRO_SCALE,
-    gy: raw.gy / GYRO_SCALE,
-    gz: raw.gz / GYRO_SCALE,
+    ay:
+      raw.ay /
+      ACCEL_SCALE,
+
+    az:
+      raw.az /
+      ACCEL_SCALE,
+
+    gx:
+      raw.gx /
+      GYRO_SCALE,
+
+    gy:
+      raw.gy /
+      GYRO_SCALE,
+
+    gz:
+      raw.gz /
+      GYRO_SCALE,
   };
 }
 
@@ -495,8 +764,14 @@ function convertSensorData(raw) {
 // CALCULATE ACCELERATION MAGNITUDE
 // =====================================================
 
-function calculateAcceleration(sensor) {
-  return Math.sqrt(sensor.ax ** 2 + sensor.ay ** 2 + sensor.az ** 2);
+function calculateAcceleration(
+  sensor
+) {
+  return Math.sqrt(
+    sensor.ax ** 2 +
+      sensor.ay ** 2 +
+      sensor.az ** 2
+  );
 }
 
 // =====================================================
@@ -505,72 +780,155 @@ function calculateAcceleration(sensor) {
 
 // Normalize angle to -180 to +180 degrees.
 
-function normalizeAngle(angle) {
-  return ((((angle + 180) % 360) + 360) % 360) - 180;
+function normalizeAngle(
+  angle
+) {
+  return (
+    (
+      (
+        (
+          angle +
+          180
+        ) %
+          360 +
+        360
+      ) %
+        360
+    ) -
+    180
+  );
 }
 
 // =====================================================
 // CALCULATE KNEE ANGLE
 // =====================================================
 
-function calculateKneeAngle(thigh, shin, dt) {
+function calculateKneeAngle(
+  thigh,
+  shin,
+  dt
+) {
   // Accelerometer orientation estimates.
   // Assumes sensor X axes correspond to the
   // intended knee flexion/extension rotation.
 
-  const thighAccelAngle = Math.atan2(thigh.ay, thigh.az) * RAD_TO_DEG;
+  const thighAccelAngle =
+    Math.atan2(
+      thigh.ay,
+      thigh.az
+    ) *
+    RAD_TO_DEG;
 
-  const shinAccelAngle = Math.atan2(shin.ay, shin.az) * RAD_TO_DEG;
+  const shinAccelAngle =
+    Math.atan2(
+      shin.ay,
+      shin.az
+    ) *
+    RAD_TO_DEG;
 
   // Initialize filter using accelerometer readings.
 
-  if (!filterInitialized) {
-    thighAngle = thighAccelAngle;
-    shinAngle = shinAccelAngle;
+  if (
+    !filterInitialized
+  ) {
+    thighAngle =
+      thighAccelAngle;
+
+    shinAngle =
+      shinAccelAngle;
 
     filterInitialized = true;
   } else {
     // Predict orientation using gyroscope.
 
-    const thighPrediction = thighAngle + thigh.gx * dt;
+    const thighPrediction =
+      thighAngle +
+      thigh.gx *
+        dt;
 
-    const shinPrediction = shinAngle + shin.gx * dt;
+    const shinPrediction =
+      shinAngle +
+      shin.gx *
+        dt;
 
     // Correct using accelerometer.
     // Normalize angular differences to avoid
     // discontinuities around +/-180 degrees.
 
-    thighAngle = normalizeAngle(
-      thighPrediction +
-        (1 - FILTER_ALPHA) * normalizeAngle(thighAccelAngle - thighPrediction),
-    );
+    thighAngle =
+      normalizeAngle(
+        thighPrediction +
+          (
+            1 -
+            FILTER_ALPHA
+          ) *
+            normalizeAngle(
+              thighAccelAngle -
+                thighPrediction
+            )
+      );
 
-    shinAngle = normalizeAngle(
-      shinPrediction +
-        (1 - FILTER_ALPHA) * normalizeAngle(shinAccelAngle - shinPrediction),
-    );
+    shinAngle =
+      normalizeAngle(
+        shinPrediction +
+          (
+            1 -
+            FILTER_ALPHA
+          ) *
+            normalizeAngle(
+              shinAccelAngle -
+                shinPrediction
+            )
+      );
   }
 
   // Relative thigh/shin orientation.
+  const relativeAngle =
+    normalizeAngle(
+      thighAngle -
+        shinAngle
+    );
 
-  const relativeAngle = normalizeAngle(thighAngle - shinAngle);
+  // Measure how far the knee has bent away from
+  // the calibrated straight-leg position.
+  const bendAngle =
+    Math.abs(
+      normalizeAngle(
+        relativeAngle -
+          kneeZeroOffset
+      )
+    );
 
-  kneeAngle = Math.abs(normalizeAngle(relativeAngle - kneeZeroOffset));
+  // Anatomical-style knee angle:
+  // straight leg = 180 degrees
+  // more knee flexion = a smaller angle
+  kneeAngle =
+    180 -
+    bendAngle;
 
   return kneeAngle;
 }
 
 function calibrateKnee() {
-  kneeZeroOffset = normalizeAngle(thighAngle - shinAngle);
+  kneeZeroOffset =
+    normalizeAngle(
+      thighAngle -
+        shinAngle
+    );
 
-  console.log("Knee calibrated. Offset:", kneeZeroOffset);
+  console.log(
+    "Knee calibrated. Offset:",
+    kneeZeroOffset
+  );
 }
 
 // =====================================================
 // CALCULATE IMPACT ACCELERATION
 // =====================================================
 
-function calculateImpact(acceleration) {
+function calculateImpact(
+  acceleration
+) {
   // Simple dynamic acceleration proxy.
   //
   // At rest, acceleration magnitude is ~1g.
@@ -578,17 +936,26 @@ function calculateImpact(acceleration) {
   // knee force or true gravity-compensated
   // linear acceleration.
 
-  return Math.abs(acceleration - 1.0);
+  return Math.abs(
+    acceleration -
+      1.0
+  );
 }
 
 // =====================================================
 // DETECT FOOT STRIKE
 // =====================================================
 
-function detectFootStrike(impact, currentTime) {
+function detectFootStrike(
+  impact,
+  currentTime
+) {
   // Rearm when acceleration settles.
 
-  if (impact < IMPACT_RESET_THRESHOLD) {
+  if (
+    impact <
+    IMPACT_RESET_THRESHOLD
+  ) {
     impactArmed = true;
   }
 
@@ -596,12 +963,16 @@ function detectFootStrike(impact, currentTime) {
 
   if (
     impactArmed &&
-    impact > IMPACT_THRESHOLD &&
-    currentTime - lastImpactTime >= IMPACT_COOLDOWN
+    impact >
+      IMPACT_THRESHOLD &&
+    currentTime -
+      lastImpactTime >=
+      IMPACT_COOLDOWN
   ) {
     impactArmed = false;
 
-    lastImpactTime = currentTime;
+    lastImpactTime =
+      currentTime;
 
     return true;
   }
@@ -619,38 +990,73 @@ function detectFootStrike(impact, currentTime) {
 // This is an experimental step-size proxy,
 // NOT a physical distance measurement.
 
-let swingMinimum = Infinity;
-let swingMaximum = -Infinity;
+let swingMinimum =
+  Infinity;
 
-function updateSwingAmplitude(angle) {
+let swingMaximum =
+  -Infinity;
+
+function updateSwingAmplitude(
+  angle
+) {
   // Track unwrapped-equivalent local angle.
   // Assumes a normal walking range that does
   // not cross the +/-180-degree boundary.
 
-  swingMinimum = Math.min(swingMinimum, angle);
+  swingMinimum =
+    Math.min(
+      swingMinimum,
+      angle
+    );
 
-  swingMaximum = Math.max(swingMaximum, angle);
+  swingMaximum =
+    Math.max(
+      swingMaximum,
+      angle
+    );
 }
 
 function calculateSwingAmplitude() {
-  if (!Number.isFinite(swingMinimum) || !Number.isFinite(swingMaximum)) {
+  if (
+    !Number.isFinite(
+      swingMinimum
+    ) ||
+    !Number.isFinite(
+      swingMaximum
+    )
+  ) {
     return null;
   }
 
-  return swingMaximum - swingMinimum;
+  return (
+    swingMaximum -
+    swingMinimum
+  );
 }
 
-function resetSwingAmplitude(angle) {
-  swingMinimum = angle;
-  swingMaximum = angle;
+function resetSwingAmplitude(
+  angle
+) {
+  swingMinimum =
+    angle;
+
+  swingMaximum =
+    angle;
 }
 
 // =====================================================
 // RECORD INDIVIDUAL FOOT STRIKE
 // =====================================================
 
-function recordFootStrike(kneeAngle, impact, timestamp, swingAmplitude) {
-  if (!activity.recording) {
+function recordFootStrike(
+  kneeAngle,
+  impact,
+  timestamp,
+  swingAmplitude
+) {
+  if (
+    !activity.recording
+  ) {
     return;
   }
 
@@ -663,34 +1069,57 @@ function recordFootStrike(kneeAngle, impact, timestamp, swingAmplitude) {
     swingAmplitude,
   };
 
-  activity.footStrikes.push(strike);
+  activity.footStrikes.push(
+    strike
+  );
 
   // Update running statistics.
 
   activity.totalSteps++;
 
-  activity.impactSum += impact;
+  activity.impactSum +=
+    impact;
 
-  activity.kneeAngleSum += kneeAngle;
+  activity.kneeAngleSum +=
+    kneeAngle;
 
-  activity.maxImpact = Math.max(activity.maxImpact, impact);
+  activity.maxImpact =
+    Math.max(
+      activity.maxImpact,
+      impact
+    );
 
   updateStepCount();
 
-  if (swingAmplitude !== null) {
-    activity.swingAmplitudeSum += swingAmplitude;
+  if (
+    swingAmplitude !==
+    null
+  ) {
+    activity.swingAmplitudeSum +=
+      swingAmplitude;
 
     activity.swingAmplitudeCount++;
   }
 
-  console.log("Foot strike:", strike);
+  console.log(
+    "Foot strike:",
+    strike
+  );
 }
 
 function updateStepCount() {
-  const stepCountElement = document.getElementById("step-count");
+  const stepCountElement =
+    document.getElementById(
+      "step-count"
+    );
 
-  if (stepCountElement) {
-    stepCountElement.textContent = String(activity.totalSteps);
+  if (
+    stepCountElement
+  ) {
+    stepCountElement.textContent =
+      String(
+        activity.totalSteps
+      );
   }
 }
 
@@ -699,27 +1128,42 @@ function updateStepCount() {
 // =====================================================
 
 function getActivitySummary() {
-  const steps = activity.totalSteps;
+  const steps =
+    activity.totalSteps;
 
   return {
-    startedAt: activity.startedAt,
+    startedAt:
+      activity.startedAt,
 
-    endedAt: activity.endedAt,
+    endedAt:
+      activity.endedAt,
 
-    totalSteps: steps,
+    totalSteps:
+      steps,
 
-    averageKneeAngleAtImpact: steps > 0 ? activity.kneeAngleSum / steps : 0,
+    averageKneeAngleAtImpact:
+      steps > 0
+        ? activity.kneeAngleSum /
+          steps
+        : 0,
 
-    maxImpact: activity.maxImpact,
+    maxImpact:
+      activity.maxImpact,
 
-    averageImpact: steps > 0 ? activity.impactSum / steps : 0,
+    averageImpact:
+      steps > 0
+        ? activity.impactSum /
+          steps
+        : 0,
 
     // Angular proxy, measured in degrees.
     // Not actual stride length in metres.
 
     averageSwingAmplitude:
-      activity.swingAmplitudeCount > 0
-        ? activity.swingAmplitudeSum / activity.swingAmplitudeCount
+      activity.swingAmplitudeCount >
+      0
+        ? activity.swingAmplitudeSum /
+          activity.swingAmplitudeCount
         : null,
   };
 }
@@ -728,109 +1172,168 @@ function getActivitySummary() {
 // RECEIVE BLE SENSOR DATA
 // =====================================================
 
-function handleSensorData(event) {
-  if (!activity.recording) {
+function handleSensorData(
+  event
+) {
+  if (
+    !activity.recording
+  ) {
     return;
   }
 
-  const data = event.target.value;
+  const data =
+    event.target.value;
 
   // Decode raw measurements.
 
-  const decoded = decodeSensorData(data);
+  const decoded =
+    decodeSensorData(
+      data
+    );
 
-  if (!decoded) {
-    console.warn("Unexpected BLE packet size:", data.byteLength);
+  if (
+    !decoded
+  ) {
+    console.warn(
+      "Unexpected BLE packet size:",
+      data.byteLength
+    );
 
     return;
   }
 
   // Convert raw values to physical units.
 
-  const thigh = convertSensorData(decoded.thigh);
+  const thigh =
+    convertSensorData(
+      decoded.thigh
+    );
 
-  const shin = convertSensorData(decoded.shin);
+  const shin =
+    convertSensorData(
+      decoded.shin
+    );
 
   // ====================================
   // TIME DELTA
   // ====================================
 
-  const currentTime = performance.now();
+  const currentTime =
+    performance.now();
 
   let dt = 0.02;
 
-  if (previousTime !== null) {
-    dt = (currentTime - previousTime) / 1000;
+  if (
+    previousTime !==
+    null
+  ) {
+    dt =
+      (
+        currentTime -
+        previousTime
+      ) /
+      1000;
 
     // Avoid unusually large integration steps.
 
-    if (dt <= 0 || dt > 0.2) {
+    if (
+      dt <= 0 ||
+      dt > 0.2
+    ) {
       dt = 0.02;
     }
   }
 
-  previousTime = currentTime;
+  previousTime =
+    currentTime;
 
   // ====================================
   // CALCULATE KNEE ANGLE
   // ====================================
 
-  // Initialize the complementary filter
-calculateKneeAngle(thigh, shin, dt);
+  // Calculate the current knee angle using both IMUs.
+  calculateKneeAngle(
+    thigh,
+    shin,
+    dt
+  );
 
-// Automatically establish zero on the first valid reading
-if (!kneeCalibrated) {
+  // Automatically calibrate the first valid position as a straight leg.
+  // Keep the leg straight when starting the hike.
+  if (
+    !kneeCalibrated
+  ) {
     calibrateKnee();
-    kneeCalibrated = true;
 
-    console.log("Automatic knee calibration completed.");
-}
+    kneeCalibrated =
+      true;
 
-// Recalculate the knee angle using the calibrated offset
-const kneeAngle = Math.abs(
-    normalizeAngle(
-        normalizeAngle(thighAngle - shinAngle) - kneeZeroOffset
-    )
-);
+    // The calibrated straight-leg position is 180 degrees.
+    kneeAngle = 180;
+
+    console.log(
+      "Automatic knee calibration completed. Straight leg = 180 degrees."
+    );
+  }
 
   // ====================================
   // CALCULATE ACCELERATION
   // ====================================
 
-  const acceleration = calculateAcceleration(shin);
+  const acceleration =
+    calculateAcceleration(
+      shin
+    );
 
   // ====================================
   // CALCULATE IMPACT
   // ====================================
 
-  const impact = calculateImpact(acceleration);
+  const impact =
+    calculateImpact(
+      acceleration
+    );
 
   // ====================================
   // TRACK LEG SWING
   // ====================================
 
-  updateSwingAmplitude(thighAngle);
+  updateSwingAmplitude(
+    thighAngle
+  );
 
   // ====================================
   // DETECT FOOT STRIKE
   // ====================================
 
-  const impactDetected = detectFootStrike(impact, currentTime);
+  const impactDetected =
+    detectFootStrike(
+      impact,
+      currentTime
+    );
 
-  if (impactDetected) {
-    impactKnee = kneeAngle;
-    impactStrength = impact;
+  if (
+    impactDetected
+  ) {
+    impactKnee =
+      kneeAngle;
 
-    const swingAmplitude = calculateSwingAmplitude();
+    impactStrength =
+      impact;
+
+    const swingAmplitude =
+      calculateSwingAmplitude();
 
     recordFootStrike(
       kneeAngle,
       impact,
       new Date().toISOString(),
-      swingAmplitude,
+      swingAmplitude
     );
 
-    resetSwingAmplitude(thighAngle);
+    resetSwingAmplitude(
+      thighAngle
+    );
   }
 
   // ====================================
@@ -838,12 +1341,18 @@ const kneeAngle = Math.abs(
   // ====================================
 
   // Create the reading object once.
+
   const reading = {
-    timestamp: new Date().toISOString(),
+    timestamp:
+      new Date().toISOString(),
 
-    thigh: { ...thigh },
+    thigh: {
+      ...thigh
+    },
 
-    shin: { ...shin },
+    shin: {
+      ...shin
+    },
 
     kneeAngle,
 
@@ -854,70 +1363,129 @@ const kneeAngle = Math.abs(
     impactDetected,
   };
 
-  // 1. Continue storing in memory.
-  // This preserves your existing functionality.
-
-  activity.readings.push(reading);
+  // Continue storing in memory.
+  activity.readings.push(
+    reading
+  );
 
   // SAVE DETECTED IMPACTS ONLY
 
-  const sessionId = activeSessionId;
+  const sessionId =
+    activeSessionId;
 
-  if (sessionId !== null && impactDetected) {
+  if (
+    sessionId !==
+      null &&
+    impactDetected
+  ) {
     saveReading(
       sessionId,
       {
-        kneeAngle: kneeAngle,
-        kneeAcceleration: impact,
+        kneeAngle:
+          kneeAngle,
+
+        kneeAcceleration:
+          impact,
       },
-      true,
-    ).catch((error) => {
-      console.error("Failed to save impact:", error);
-    });
+      true
+    ).catch(
+      (error) => {
+        console.error(
+          "Failed to save impact:",
+          error
+        );
+      }
+    );
   }
 
   // ====================================
   // UPDATE EXISTING HTML ELEMENTS
   // ====================================
 
-  document.getElementById("knee").textContent = kneeAngle.toFixed(2);
+  document.getElementById(
+    "knee"
+  ).textContent =
+    kneeAngle.toFixed(
+      2
+    );
 
-  document.getElementById("acceleration").textContent = acceleration.toFixed(3);
+  document.getElementById(
+    "acceleration"
+  ).textContent =
+    acceleration.toFixed(
+      3
+    );
 
-  document.getElementById("impact").textContent = impact.toFixed(3);
+  document.getElementById(
+    "impact"
+  ).textContent =
+    impact.toFixed(
+      3
+    );
 
-  document.getElementById("impactDetected").textContent = impactDetected
-    ? "YES"
-    : "NO";
+  document.getElementById(
+    "impactDetected"
+  ).textContent =
+    impactDetected
+      ? "YES"
+      : "NO";
 
-  document.getElementById("impactKnee").textContent = impactKnee.toFixed(2);
+  document.getElementById(
+    "impactKnee"
+  ).textContent =
+    impactKnee.toFixed(
+      2
+    );
 
-  document.getElementById("impactStrength").textContent =
-    impactStrength.toFixed(3);
+  document.getElementById(
+    "impactStrength"
+  ).textContent =
+    impactStrength.toFixed(
+      3
+    );
 
   // ====================================
   // UPDATE LAST FOOT STRIKE
   // ====================================
 
-  if (impactDetected) {
-    document.getElementById("impactKneeLarge").textContent =
-      impactKnee.toFixed(1);
+  if (
+    impactDetected
+  ) {
+    document.getElementById(
+      "impactKneeLarge"
+    ).textContent =
+      impactKnee.toFixed(
+        1
+      );
 
-    document.getElementById("impactStrengthLarge").textContent =
-      impactStrength.toFixed(2);
+    document.getElementById(
+      "impactStrengthLarge"
+    ).textContent =
+      impactStrength.toFixed(
+        2
+      );
   }
 
   // ====================================
   // UPDATE GRAPH DATA
   // ====================================
 
-  kneeData.push(kneeAngle);
+  kneeData.push(
+    kneeAngle
+  );
 
-  impactData.push(impact);
+  impactData.push(
+    impact
+  );
 
-  impactMarkers.push(impactDetected);
+  impactMarkers.push(
+    impactDetected
+  );
 
-  if (kneeData.length > MAX_POINTS) {
+  if (
+    kneeData.length >
+    MAX_POINTS
+  ) {
     kneeData.shift();
     impactData.shift();
     impactMarkers.shift();
@@ -927,102 +1495,212 @@ const kneeAngle = Math.abs(
   // DRAW GRAPHS
   // ====================================
 
-  drawGraph(kneeCanvas, kneeCtx, kneeData, impactMarkers, 120, "deg");
+  drawGraph(
+    kneeCanvas,
+    kneeCtx,
+    kneeData,
+    impactMarkers,
+    180,
+    "deg"
+  );
 
-  drawGraph(impactCanvas, impactCtx, impactData, impactMarkers, 3, "g");
+  drawGraph(
+    impactCanvas,
+    impactCtx,
+    impactData,
+    impactMarkers,
+    3,
+    "g"
+  );
 
   // ====================================
   // SERIAL-STYLE LOG
   // ====================================
 
-  const time = new Date().toLocaleTimeString();
+  const time =
+    new Date().toLocaleTimeString();
 
   const line =
     time +
     " | Knee=" +
-    kneeAngle.toFixed(2) +
+    kneeAngle.toFixed(
+      2
+    ) +
     " deg | Accel=" +
-    acceleration.toFixed(3) +
+    acceleration.toFixed(
+      3
+    ) +
     " g | Impact=" +
-    impact.toFixed(3) +
+    impact.toFixed(
+      3
+    ) +
     " g | Detected=" +
-    (impactDetected ? "YES" : "NO") +
+    (
+      impactDetected
+        ? "YES"
+        : "NO"
+    ) +
     " | Steps=" +
     activity.totalSteps;
 
-  serialLines.push(line);
+  serialLines.push(
+    line
+  );
 
-  if (serialLines.length > MAX_SERIAL_LINES) {
+  if (
+    serialLines.length >
+    MAX_SERIAL_LINES
+  ) {
     serialLines.shift();
   }
 
-  serialOutput.textContent = serialLines.join("\n");
+  serialOutput.textContent =
+    serialLines.join(
+      "\n"
+    );
 
-  serialOutput.scrollTop = serialOutput.scrollHeight;
+  serialOutput.scrollTop =
+    serialOutput.scrollHeight;
 }
 
 // =====================================================
 // DRAW GRAPH
 // =====================================================
 
-function drawGraph(canvas, ctx, values, markers, maxValue, unit) {
-  const width = canvas.width;
-  const height = canvas.height;
+function drawGraph(
+  canvas,
+  ctx,
+  values,
+  markers,
+  maxValue,
+  unit
+) {
+  const width =
+    canvas.width;
+
+  const height =
+    canvas.height;
 
   const left = 55;
   const right = 15;
   const top = 15;
   const bottom = 30;
 
-  const graphWidth = width - left - right;
+  const graphWidth =
+    width -
+    left -
+    right;
 
-  const graphHeight = height - top - bottom;
+  const graphHeight =
+    height -
+    top -
+    bottom;
 
   // Clear canvas.
 
-  ctx.clearRect(0, 0, width, height);
+  ctx.clearRect(
+    0,
+    0,
+    width,
+    height
+  );
 
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.fillRect(
+    0,
+    0,
+    width,
+    height
+  );
 
   // ====================================
   // GRID AND Y AXIS
   // ====================================
 
-  ctx.strokeStyle = "#dddddd";
+  ctx.strokeStyle =
+    "#dddddd";
+
   ctx.lineWidth = 1;
 
-  ctx.font = "12px Arial";
-  ctx.fillStyle = "#555555";
+  ctx.font =
+    "12px Arial";
+
+  ctx.fillStyle =
+    "#555555";
 
   const divisions = 6;
 
-  for (let i = 0; i <= divisions; i++) {
-    const value = maxValue * (i / divisions);
+  for (
+    let i = 0;
+    i <= divisions;
+    i++
+  ) {
+    const value =
+      maxValue *
+      (
+        i /
+        divisions
+      );
 
-    const y = top + graphHeight - (value / maxValue) * graphHeight;
+    const y =
+      top +
+      graphHeight -
+      (
+        value /
+        maxValue
+      ) *
+        graphHeight;
 
     ctx.beginPath();
 
-    ctx.moveTo(left, y);
-    ctx.lineTo(width - right, y);
+    ctx.moveTo(
+      left,
+      y
+    );
+
+    ctx.lineTo(
+      width -
+        right,
+      y
+    );
 
     ctx.stroke();
 
-    ctx.fillText(value.toFixed(1) + " " + unit, 3, y + 4);
+    ctx.fillText(
+      value.toFixed(
+        1
+      ) +
+        " " +
+        unit,
+      3,
+      y + 4
+    );
   }
 
   // ====================================
   // TIME LABELS
   // ====================================
 
-  ctx.fillStyle = "#555555";
+  ctx.fillStyle =
+    "#555555";
 
-  ctx.fillText("Older", left, height - 8);
+  ctx.fillText(
+    "Older",
+    left,
+    height - 8
+  );
 
-  ctx.fillText("Now", width - 40, height - 8);
+  ctx.fillText(
+    "Now",
+    width - 40,
+    height - 8
+  );
 
-  if (values.length < 2) {
+  if (
+    values.length < 2
+  ) {
     return;
   }
 
@@ -1032,22 +1710,60 @@ function drawGraph(canvas, ctx, values, markers, maxValue, unit) {
 
   ctx.beginPath();
 
-  ctx.strokeStyle = "#2563eb";
+  ctx.strokeStyle =
+    "#2563eb";
+
   ctx.lineWidth = 2;
 
-  values.forEach((value, index) => {
-    const x = left + (index / (MAX_POINTS - 1)) * graphWidth;
+  values.forEach(
+    (
+      value,
+      index
+    ) => {
+      const x =
+        left +
+        (
+          index /
+          (
+            MAX_POINTS -
+            1
+          )
+        ) *
+          graphWidth;
 
-    const clampedValue = Math.min(Math.max(value, 0), maxValue);
+      const clampedValue =
+        Math.min(
+          Math.max(
+            value,
+            0
+          ),
+          maxValue
+        );
 
-    const y = top + graphHeight - (clampedValue / maxValue) * graphHeight;
+      const y =
+        top +
+        graphHeight -
+        (
+          clampedValue /
+          maxValue
+        ) *
+          graphHeight;
 
-    if (index === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
+      if (
+        index === 0
+      ) {
+        ctx.moveTo(
+          x,
+          y
+        );
+      } else {
+        ctx.lineTo(
+          x,
+          y
+        );
+      }
     }
-  });
+  );
 
   ctx.stroke();
 
@@ -1055,34 +1771,86 @@ function drawGraph(canvas, ctx, values, markers, maxValue, unit) {
   // DRAW IMPACT MARKERS
   // ====================================
 
-  values.forEach((value, index) => {
-    if (!markers[index]) {
-      return;
+  values.forEach(
+    (
+      value,
+      index
+    ) => {
+      if (
+        !markers[index]
+      ) {
+        return;
+      }
+
+      const x =
+        left +
+        (
+          index /
+          (
+            MAX_POINTS -
+            1
+          )
+        ) *
+          graphWidth;
+
+      const clampedValue =
+        Math.min(
+          Math.max(
+            value,
+            0
+          ),
+          maxValue
+        );
+
+      const y =
+        top +
+        graphHeight -
+        (
+          clampedValue /
+          maxValue
+        ) *
+          graphHeight;
+
+      ctx.beginPath();
+
+      ctx.fillStyle =
+        "#ef4444";
+
+      ctx.arc(
+        x,
+        y,
+        6,
+        0,
+        Math.PI *
+          2
+      );
+
+      ctx.fill();
     }
-
-    const x = left + (index / (MAX_POINTS - 1)) * graphWidth;
-
-    const clampedValue = Math.min(Math.max(value, 0), maxValue);
-
-    const y = top + graphHeight - (clampedValue / maxValue) * graphHeight;
-
-    ctx.beginPath();
-
-    ctx.fillStyle = "#ef4444";
-
-    ctx.arc(x, y, 6, 0, Math.PI * 2);
-
-    ctx.fill();
-  });
+  );
 }
 
 // =====================================================
 // INITIAL EMPTY GRAPHS
 // =====================================================
 
-drawGraph(kneeCanvas, kneeCtx, [], [], 120, "deg");
+drawGraph(
+  kneeCanvas,
+  kneeCtx,
+  [],
+  [],
+  180,
+  "deg"
+);
 
-drawGraph(impactCanvas, impactCtx, [], [], 3, "g");
+drawGraph(
+  impactCanvas,
+  impactCtx,
+  [],
+  [],
+  3,
+  "g"
+);
 
 // =====================================================
 // API FOR THE HIKE SESSION PAGE (hike-flow.js)
@@ -1092,10 +1860,12 @@ window.HikingSensor = {
   connectToESP32,
 
   // startStepCounting({ name }) -> IndexedDB session id
-  startStepCounting: startActivity,
+  startStepCounting:
+    startActivity,
 
   // stopStepCounting({ completed: true }) when the user finishes
-  stopStepCounting: stopActivity,
+  stopStepCounting:
+    stopActivity,
 };
 
 // =====================================================
@@ -1106,22 +1876,31 @@ window.HikingSensor = {
 // without modifying index.html.
 
 window.hikingActivity = {
-  start: startActivity,
+  start:
+    startActivity,
 
-  stop: stopActivity,
+  stop:
+    stopActivity,
 
-  summary: getActivitySummary,
+  summary:
+    getActivitySummary,
 
-  calibrate: calibrateKnee,
+  calibrate:
+    calibrateKnee,
 
-  getReadings: () => activity.readings,
+  getReadings:
+    () =>
+      activity.readings,
 
-  getFootStrikes: () => activity.footStrikes,
+  getFootStrikes:
+    () =>
+      activity.footStrikes,
 
-  getAngles: () => ({
-    thighAngle,
-    shinAngle,
-    kneeAngle,
-    kneeZeroOffset,
-  }),
+  getAngles:
+    () => ({
+      thighAngle,
+      shinAngle,
+      kneeAngle,
+      kneeZeroOffset,
+    }),
 };

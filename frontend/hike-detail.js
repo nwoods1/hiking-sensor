@@ -203,7 +203,7 @@
     }
     $("pauses-panel").hidden = false;
 
-    // ---------- every-10-steps charts from the zipped sensor file ----------
+    // ---------- every-step charts from the zipped sensor file ----------
     // loadHikeImpacts (hikeStorage.js) downloads hike-data/<data_path> and
     // unzips it back into [{ t, accel, angle }], one entry per step.
     const chartsMessage = $("step-charts-message");
@@ -218,9 +218,11 @@
         }
         chartsMessage.textContent = "";
         window.HikeCharts.render({
-            impactElement: $("avg-impact-chart"),
-            angleElement: $("avg-angle-chart")
-        }, impacts);
+            legendElement: $("step-charts-legend"),
+            summaryElement: $("bad-landing-summary"),
+            impactElement: $("impact-chart"),
+            angleElement: $("angle-chart")
+        }, hike, impacts);
     } catch (err) {
         $("step-charts-body").hidden = true;
         chartsMessage.textContent = `Could not load this hike's step data: ${err.message}`;
