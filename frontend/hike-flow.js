@@ -8,6 +8,7 @@
     const timerStatus = document.getElementById("timer-status");
     const timerDisplay = document.getElementById("hike-timer");
     const liveData = document.getElementById("hike-live-data");
+    const mockMode = new URLSearchParams(window.location.search).get("mockBluetooth") === "1";
     let device;
     let startedAt;
     let timerId;
@@ -33,7 +34,9 @@
                     name,
                     createdAt: createdAt.toISOString()
                 }));
-                window.location.href = "hike-session.html";
+                window.location.href = mockMode
+                    ? "hike-session.html?mockBluetooth=1"
+                    : "hike-session.html";
             } catch (error) {
                 document.getElementById("new-hike-message").textContent =
                     `Could not prepare the hike: ${error.message}`;
@@ -48,6 +51,14 @@
         draft = JSON.parse(sessionStorage.getItem("hiking-sensor-draft") || "null");
     } catch (error) {
         showConnectionMessage(`Could not read the new hike: ${error.message}`, true);
+    }
+    if (!draft && mockMode) {
+        draft = { name: "Mock Hike", createdAt: new Date().toISOString() };
+        try {
+            sessionStorage.setItem("hiking-sensor-draft", JSON.stringify(draft));
+        } catch (error) {
+            showConnectionMessage(`Could not save the mock hike draft: ${error.message}`, true);
+        }
     }
     if (!draft?.name || !draft?.createdAt) {
         window.location.href = "new-hike.html";
@@ -95,6 +106,7 @@
         finishButton.hidden = false;
         connectButton.disabled = true;
         timerStatus.textContent = "Hike in progress.";
+        window.HikingSensor.startStepCounting();
         liveData.hidden = false;
         timerId = window.setInterval(updateTimer, 1000);
         updateTimer();
@@ -103,6 +115,7 @@
     finishButton.addEventListener("click", () => {
         if (!startedAt) return;
         window.clearInterval(timerId);
+        window.HikingSensor.stopStepCounting();
         const endedAt = new Date();
         const hike = {
             id: crypto.randomUUID(),
@@ -134,6 +147,7 @@
 
     function handleDisconnect() {
         startButton.disabled = true;
+        window.HikingSensor.stopStepCounting();
         if (startedAt) {
             window.clearInterval(timerId);
             timerId = undefined;

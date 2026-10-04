@@ -47,19 +47,91 @@ const impactData = [];
 const impactMarkers = [];
 
 const serialLines = [];
+let stepCount = 0;
+let isCountingSteps = false;
+let impactSignalActive = false;
 
 // =====================================================
 // CONNECT BUTTON
 // =====================================================
 
 connectButton?.addEventListener("click", connectToESP32);
-window.HikingSensor = { connectToESP32 };
+window.HikingSensor = {
+  connectToESP32,
+  startStepCounting,
+  stopStepCounting,
+};
+
+function startStepCounting() {
+  stepCount = 0;
+  isCountingSteps = true;
+  const stepCountElement = document.getElementById("step-count");
+  if (stepCountElement) stepCountElement.textContent = String(stepCount);
+}
+
+function stopStepCounting() {
+  isCountingSteps = false;
+}
+
+// mock esp32
+function createMockDevice() {
+  let connected = true;
+  let timer;
+  const disconnectListeners = new Set();
+
+  const device = {
+    name: "Mock ESP32",
+    gatt: {
+      get connected() {
+        return connected;
+      },
+      disconnect() {
+        if (!connected) return;
+        connected = false;
+        clearInterval(timer);
+        disconnectListeners.forEach((listener) => listener());
+      },
+    },
+    addEventListener(type, listener) {
+      if (type === "gattserverdisconnected") {
+        disconnectListeners.add(listener);
+      }
+    },
+  };
+
+  let lastImpact = 0;
+  timer = setInterval(() => {
+    const elapsed = Date.now() / 1000;
+    const kneeAngle = Math.round(3500 + Math.sin(elapsed * 2) * 1200);
+    const impactDetected = Math.floor(elapsed / 5) > lastImpact ? 1 : 0;
+
+    if (impactDetected) lastImpact = Math.floor(elapsed / 5);
+
+    const packet = new DataView(new ArrayBuffer(12));
+    packet.setInt16(0, kneeAngle, true);
+    packet.setInt16(2, 1000 + Math.round(Math.sin(elapsed) * 100), true);
+    packet.setInt16(4, impactDetected ? 350 : 30, true);
+    packet.setInt16(6, impactDetected, true);
+    packet.setInt16(8, kneeAngle, true);
+    packet.setInt16(10, impactDetected ? 500 : 30, true);
+
+    handleSensorData({ target: { value: packet } });
+  }, 100);
+
+  return device;
+}
 
 // =====================================================
 // CONNECT TO ESP32
 // =====================================================
 
 async function connectToESP32() {
+
+  if (new URLSearchParams(window.location.search).get("mockBluetooth") === "1") {
+    statusText.textContent = "Connected to Mock ESP32 (test mode)";
+    return createMockDevice();
+  }
+
   try {
     statusText.textContent = "Searching for Bluetooth devices...";
 
@@ -119,6 +191,14 @@ function handleSensorData(event) {
   const impact = data.getInt16(4, true) / 1000;
 
   const impactDetected = data.getInt16(6, true);
+  const hasImpact = impactDetected === 1;
+
+  if (isCountingSteps && hasImpact && !impactSignalActive) {
+    stepCount += 1;
+    const stepCountElement = document.getElementById("step-count");
+    if (stepCountElement) stepCountElement.textContent = String(stepCount);
+  }
+  impactSignalActive = hasImpact;
 
   const impactKnee = data.getInt16(8, true) / 100;
 
@@ -154,7 +234,7 @@ function handleSensorData(event) {
   // NEW FOOT STRIKE
   // ===================================================
 
-  if (impactDetected === 1) {
+  if (hasImpact) {
     const impactKneeLarge = document.getElementById("impactKneeLarge");
     if (impactKneeLarge) impactKneeLarge.textContent = impactKnee.toFixed(1);
 
@@ -172,7 +252,7 @@ function handleSensorData(event) {
 
   impactData.push(impact);
 
-  impactMarkers.push(impactDetected === 1);
+  impactMarkers.push(hasImpact);
 
   // Only keep the newest 250 values.
   //

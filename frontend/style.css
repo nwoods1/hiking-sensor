@@ -577,6 +577,32 @@ body {
   font-weight: 700;
 }
 
+.step-count-panel {
+  display: flex;
+  min-height: 210px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.step-count-panel h2 {
+  align-self: flex-start;
+}
+
+.step-count-value {
+  margin: 8px 0 0;
+  color: #526957;
+  font-size: clamp(3rem, 8vw, 5rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.step-count-panel .muted {
+  margin-bottom: 0;
+}
+
 .live-data-grid .graph-panel canvas {
   display: block;
   width: 100%;
