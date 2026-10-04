@@ -71,7 +71,7 @@
       label.textContent =
         sender === "user"
           ? "You"
-          : "Hiking Assistant";
+          : "Soft Step Assistant";
 
 
       const content =

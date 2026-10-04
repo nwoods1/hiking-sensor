@@ -290,7 +290,7 @@ footer p {
 }
 
 .auth-dialog .dialog-close:hover {
-  background: var(--green2);
+  background: var(--secondary-color);
 }
 
 .nav-auth-button {
@@ -309,7 +309,7 @@ footer p {
 .nav-auth-button:hover,
 .nav-auth-button:focus-visible {
   transform: translateY(-0.5px);
-  background-color: var(--primary-color);
+  background-color: var(--secondary-color);
 }
 
 .app-page {
@@ -489,7 +489,7 @@ button {
 .button-link:hover,
 button:hover {
   transform: translateY(-1px);
-  background: var(--primary-color);
+  background: var(--secondary-color);
 }
 
 
@@ -1080,7 +1080,7 @@ app-page b
 
 .suggestion:hover,
 .suggestion:focus-visible {
-  background: var(--primary-color);
+  background: var(--secondary-color);
 }
 
 .chat-form {
@@ -1116,7 +1116,7 @@ app-page b
 
 .chat-form button:hover,
 .chat-form button:focus-visible {
-  background: var(--primary-color);
+  background: var(--secondary-color);
 }
 
 .chat-form button:disabled {
