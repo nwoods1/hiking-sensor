@@ -28,6 +28,22 @@
             <dl id="hike-details" class="detail-grid"></dl>
         </section>
 
+        <section class="panel" id="step-charts-panel" hidden>
+            <h2>Every 10 steps</h2>
+            <p class="muted">Each point is the average of 10 steps from this hike's saved sensor data. Hover over a chart for details.</p>
+            <div id="step-charts-body">
+                <figure class="chart">
+                    <figcaption>Average impact acceleration</figcaption>
+                    <div id="avg-impact-chart" class="chart-plot"></div>
+                </figure>
+                <figure class="chart">
+                    <figcaption>Average knee angle at impact</figcaption>
+                    <div id="avg-angle-chart" class="chart-plot"></div>
+                </figure>
+            </div>
+            <p id="step-charts-message" class="notice" role="status" aria-live="polite"></p>
+        </section>
+
         <section class="panel" id="buckets-panel" hidden>
             <h2>Impact distribution</h2>
             <div id="impact-buckets"></div>
@@ -48,6 +64,7 @@
     <script src="supabase-config.js"></script>
     <script src="stats.js"></script>
     <script src="hikeStorage.js"></script>
+    <script src="hike-charts.js"></script>
     <script src="hike-detail.js"></script>
 </body>
 </html>

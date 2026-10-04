@@ -70,11 +70,17 @@ async function loadHike(id) {
         .from('hikes').select('*').eq('id', id).single();
     if (error) throw error;
 
+    const impacts = await loadHikeImpacts(hike.data_path);
+    return { hike, impacts };
+}
+
+// download + unzip one hike's .json.gz back into impact objects
+// [{ t (ms since start), accel (g), angle (deg) }], one per step
+async function loadHikeImpacts(dataPath) {
     const { data: blob, error: dlErr } = await sb.storage
-        .from('hike-data').download(hike.data_path);
+        .from('hike-data').download(dataPath);
     if (dlErr) throw dlErr;
 
     const f = await gunzipJson(blob);
-    const impacts = f.t.map((t, i) => ({ t, accel: f.accel[i], angle: f.angle[i] }));
-    return { hike, impacts };
+    return f.t.map((t, i) => ({ t, accel: f.accel[i], angle: f.angle[i] }));
 }

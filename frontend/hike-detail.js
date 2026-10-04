@@ -202,4 +202,28 @@
         }
     }
     $("pauses-panel").hidden = false;
+
+    // ---------- every-10-steps charts from the zipped sensor file ----------
+    // loadHikeImpacts (hikeStorage.js) downloads hike-data/<data_path> and
+    // unzips it back into [{ t, accel, angle }], one entry per step.
+    const chartsMessage = $("step-charts-message");
+    $("step-charts-panel").hidden = false;
+    chartsMessage.textContent = "Loading step data...";
+    try {
+        const impacts = await loadHikeImpacts(hike.data_path);
+        if (impacts.length === 0) {
+            $("step-charts-body").hidden = true;
+            chartsMessage.textContent = "No steps were detected during this hike.";
+            return;
+        }
+        chartsMessage.textContent = "";
+        window.HikeCharts.render({
+            impactElement: $("avg-impact-chart"),
+            angleElement: $("avg-angle-chart")
+        }, impacts);
+    } catch (err) {
+        $("step-charts-body").hidden = true;
+        chartsMessage.textContent = `Could not load this hike's step data: ${err.message}`;
+        chartsMessage.classList.add("notice-error");
+    }
 })();
