@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Name a hike and prepare to connect your sensor.">
+    <title>New Hike | Hiking Sensor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chango&family=Clarity+City:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+<body class="app-page" data-require-auth>
+    <header class="app-header">
+        <a class="brand" href="index.html">Hiking Sensor</a>
+        <nav class="app-navigation" aria-label="Main navigation">
+            <a href="dashboard.html">Your hikes</a>
+        </nav>
+    </header>
+    <main class="app-main narrow-main">
+        <a class="back-link" href="dashboard.html">← Back to your hikes</a>
+        <section class="panel">
+            <p class="eyebrow">New recording</p>
+            <h1>Plan your hike</h1>
+            <p class="muted">Give this hike a name. The date and time are filled in automatically.</p>
+            <form id="new-hike-form" class="form-stack">
+                <label for="hike-name">Hike name</label>
+                <input id="hike-name" name="name" type="text" maxlength="100" placeholder="e.g. Pine Ridge Loop" required>
+                <label for="hike-created-at">Created</label>
+                <input id="hike-created-at" name="createdAt" type="text" readonly>
+                <p id="new-hike-message" class="notice" role="status" aria-live="polite"></p>
+                <button type="submit">Continue to sensor connection</button>
+            </form>
+        </section>
+    </main>
+    <script src="supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js" defer></script>
+    <script src="hike-flow.js" defer></script>
+</body>
+</html>
