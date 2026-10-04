@@ -25,12 +25,29 @@
             <p id="detail-message" class="notice" role="status" aria-live="polite"></p>
             <dl id="hike-details" class="detail-grid"></dl>
             <p class="muted">Sensor measurements can be added here when hike data recording is connected.</p>
+            <dl id="hike-details" class="detail-grid"></dl>
+        </section>
+
+        <section class="panel" id="buckets-panel" hidden>
+            <h2>Impact distribution</h2>
+            <div id="impact-buckets"></div>
+        </section>
+
+        <section class="panel" id="minutes-panel" hidden>
+            <h2>Minute by minute</h2>
+            <div class="table-wrap"><table id="per-minute-table"></table></div>
+        </section>
+
+        <section class="panel" id="pauses-panel" hidden>
+            <h2>Pauses</h2>
+            <ul id="pause-list"></ul>
         </section>
     </main>
-    <script src="supabase-config.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="auth.js" defer></script>
-    <script src="hike-store.js" defer></script>
-    <script src="hike-detail.js" defer></script>
+    <script src="supabase-config.js"></script>
+    <script src="stats.js"></script>
+    <script src="hikeStorage.js"></script>
+    <script src="hike-detail.js"></script>
 </body>
 </html>
