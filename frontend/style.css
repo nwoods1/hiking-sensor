@@ -139,6 +139,11 @@ body {
   margin: 0;
 }
 
+#signed-in {
+  background-color: var(--green2);
+  padding: 5%;
+}
+
 @media (max-width: 600px) {
   .home-page header {
     align-items: flex-start;
@@ -324,6 +329,10 @@ body {
 
 .auth-dialog .dialog-close:hover {
   background: var(--green2);
+}
+
+.auth-dialog [hidden] {
+  display: none !important;
 }
 
 .nav-auth-button {
