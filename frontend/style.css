@@ -77,6 +77,16 @@ body {
   text-decoration: underline;
 }
 
+.nav-account-label {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-family: var(--main-font);
+}
+
+.nav-account-label[hidden] {
+  display: none;
+}
+
 .home-page main {
   display: grid;
   gap: 24px;
@@ -145,9 +155,14 @@ body {
 }
 
 @media (max-width: 600px) {
-  .home-page header {
-    align-items: flex-start;
-    flex-direction: column;
+  .home-page header{
+    display: flex;
+  }
+  .header-section nav {
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 12px;
   }
 }

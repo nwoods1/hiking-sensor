@@ -1,6 +1,8 @@
 (() => {
   const authDialog = document.getElementById("sign-in");
   const authButton = document.querySelector("[data-open-auth]");
+  const accountLabel = document.querySelector("[data-account-label]");
+  const signedInEmail = document.getElementById("signed-in-email");
   const closeAuthButton = document.querySelector("[data-close-auth]");
   const hikesLink = document.querySelector("[data-hikes-link]");
   const form = document.getElementById("login-form");
@@ -27,6 +29,10 @@
 
     if (hikesLink) hikesLink.href = isSignedIn ? "dashboard.html" : "#sign-in";
     if (form) form.hidden = isSignedIn;
+    if (accountLabel) accountLabel.hidden = !isSignedIn;
+    if (signedInEmail && isSignedIn) {
+      signedInEmail.textContent = session.user.email || "your account";
+    }
     if (isSignedIn && authDialog?.open) authDialog.close();
   }
 
