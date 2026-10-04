@@ -18,6 +18,14 @@ body {
   padding: 20px;
   margin: 0;
   color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; 
+  min-height: 100dvh; /* Modern dynamic viewport height fallback */
+}
+
+main {
+  flex: 1;
 }
 
 
@@ -36,6 +44,14 @@ body {
   margin-inline: auto;
 }
 
+.app-page header,
+.app-page main,
+.app-page footer {
+  width: min(100% - 40px, 960px);
+  margin-inline: auto;
+}
+
+
 .home-page header {
   display: flex;
   align-items: center;
@@ -45,11 +61,21 @@ body {
 }
 
 .header-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-block: 24px;
   color: var(--text-color);
   font-size: 1.25rem;
   font-weight: 700;
   text-decoration: none;
   font-family: var(--header-font);
+}
+
+.header-section #signed-in {
+  font-family: var(--main-font);
+  font-size: 15px;
 }
 
 .main-navigation {
@@ -70,6 +96,16 @@ body {
 .main-navigation a:hover,
 .main-navigation a:focus-visible {
   text-decoration: underline;
+}
+
+.nav-account-label {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-family: var(--main-font);
+}
+
+.nav-account-label[hidden] {
+  display: none;
 }
 
 .home-page main {
@@ -128,11 +164,18 @@ body {
   font-family: var(--header-font);
 }
 
-.home-page footer {
+footer {
   padding-block: 16px 24px;
   border-top: 1px solid #dce5da;
   color: var(--text-color);
   font-size: 0.9rem;
+  width: min(100% - 40px, 960px);
+  margin-inline: auto;
+  margin-top: 0;
+}
+
+footer p {
+  margin: 0;
 }
 
 .home-page footer p {
@@ -140,9 +183,14 @@ body {
 }
 
 @media (max-width: 600px) {
-  .home-page header {
-    align-items: flex-start;
-    flex-direction: column;
+  .home-page header{
+    display: flex;
+  }
+  .header-section nav {
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 12px;
   }
 }
@@ -496,9 +544,9 @@ body {
   margin-top: 12px;
 }
 
-.app-page button,
 .auth-card button,
-.button-link {
+.button-link,
+button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -515,14 +563,14 @@ body {
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.app-page button:hover:not(:disabled),
 .auth-card button:hover:not(:disabled),
-.button-link:hover {
+.button-link:hover,
+button:hover {
   transform: translateY(-1px);
   background: var(--primary-color);
 }
 
-.app-page button:disabled,
+
 .auth-card button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
@@ -928,37 +976,6 @@ body {
   margin-top: 12px;
 }
 
-.app-page button,
-.auth-card button,
-.button-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 10px 18px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--accent-color);
-  color: var(--text-color);
-  cursor: pointer;
-  font: inherit;
-  font-weight: 700;
-  text-decoration: none;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.app-page button:hover:not(:disabled),
-.auth-card button:hover:not(:disabled),
-.button-link:hover {
-  transform: translateY(-1px);
-  background: var(--primary-color);
-}
-
-.app-page button:disabled,
-.auth-card button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
 
 .app-page [hidden],
 .auth-card [hidden] {
@@ -969,7 +986,7 @@ body {
   border: 1px solid var(--green) !important;
   background: #fff !important;
 }
-
+app-page b
 .button-secondary:hover:not(:disabled) {
   background: var(--green2) !important;
 }

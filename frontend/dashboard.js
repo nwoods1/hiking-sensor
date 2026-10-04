@@ -14,9 +14,6 @@
         window.location.href = "index.html#sign-in";
         return;
     }
-    accountMessage.textContent = `Signed in as ${session.user.email}`;
-    signOutButton.hidden = false;
-    signOutButton.addEventListener("click", () => sb.auth.signOut());
 
     // NEW: leave the page if the user signs out (here or in another tab)
     sb.auth.onAuthStateChange((event) => {
