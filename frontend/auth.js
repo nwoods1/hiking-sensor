@@ -102,7 +102,7 @@
     }
   });
 
-  if (typeof sb !== "undefined" && (authButton || form || hikesLink)) {
+  if (typeof sb !== "undefined" && (authButton || form || hikesLink || accountLabel)) {
     sb.auth.onAuthStateChange((_event, session) => render(session));
     sb.auth.getSession().then(({ data, error }) => {
       if (error) {

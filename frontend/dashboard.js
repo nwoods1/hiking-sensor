@@ -14,7 +14,6 @@
         window.location.href = "index.html#sign-in";
         return;
     }
-    accountMessage.textContent = `Signed in as ${session.user.email}`;
     signOutButton.hidden = false;
     signOutButton.addEventListener("click", () => sb.auth.signOut());
 
