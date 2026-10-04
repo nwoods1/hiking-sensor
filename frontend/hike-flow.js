@@ -1,14 +1,14 @@
 (() => {
-    const UUID_SERVICE = "12345678-1234-1234-1234-1234567890ab";
-    const UUID_CHARACTERISTIC = "abcdefab-1234-5678-1234-abcdefabcdef";
     const form = document.getElementById("new-hike-form");
     const sessionName = document.getElementById("session-hike-name");
     const connectButton = document.getElementById("connect-sensor");
     const startButton = document.getElementById("start-hike");
     const finishButton = document.getElementById("finish-hike");
-    const connectionStatus = document.getElementById("connection-status");
+    const connectionStatus = document.getElementById("status");
     const timerStatus = document.getElementById("timer-status");
     const timerDisplay = document.getElementById("hike-timer");
+    const liveData = document.getElementById("hike-live-data");
+    const mockMode = new URLSearchParams(window.location.search).get("mockBluetooth") === "1";
     let device;
     let startedAt;
     let timerId;
@@ -34,7 +34,9 @@
                     name,
                     createdAt: createdAt.toISOString()
                 }));
-                window.location.href = "hike-session.html";
+                window.location.href = mockMode
+                    ? "hike-session.html?mockBluetooth=1"
+                    : "hike-session.html";
             } catch (error) {
                 document.getElementById("new-hike-message").textContent =
                     `Could not prepare the hike: ${error.message}`;
@@ -50,6 +52,14 @@
     } catch (error) {
         showConnectionMessage(`Could not read the new hike: ${error.message}`, true);
     }
+    if (!draft && mockMode) {
+        draft = { name: "Mock Hike", createdAt: new Date().toISOString() };
+        try {
+            sessionStorage.setItem("hiking-sensor-draft", JSON.stringify(draft));
+        } catch (error) {
+            showConnectionMessage(`Could not save the mock hike draft: ${error.message}`, true);
+        }
+    }
     if (!draft?.name || !draft?.createdAt) {
         window.location.href = "new-hike.html";
         return;
@@ -58,7 +68,7 @@
     document.getElementById("session-created-at").textContent =
         `Created ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(draft.createdAt))}`;
 
-    if (!navigator.bluetooth) {
+    if (!navigator.bluetooth && !mockMode) {
         showConnectionMessage("Web Bluetooth is not available in this browser. Use a supported browser over HTTPS to connect.", true);
         connectButton.disabled = true;
     }
@@ -67,16 +77,12 @@
         connectButton.disabled = true;
         showConnectionMessage("Searching for your ESP32…");
         try {
-            device = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,
-                optionalServices: [UUID_SERVICE]
-            });
+            device = await window.HikingSensor.connectToESP32();
+            if (!device) {
+                connectButton.disabled = false;
+                return;
+            }
             device.addEventListener("gattserverdisconnected", handleDisconnect);
-            const server = await device.gatt.connect();
-            const service = await server.getPrimaryService(UUID_SERVICE);
-            const characteristic = await service.getCharacteristic(UUID_CHARACTERISTIC);
-            await characteristic.startNotifications();
-            characteristic.addEventListener("characteristicvaluechanged", () => {});
             showConnectionMessage(`Connected to ${device.name || "ESP32"}. You can start your hike.`);
             startButton.disabled = false;
         } catch (error) {
@@ -100,6 +106,8 @@
         finishButton.hidden = false;
         connectButton.disabled = true;
         timerStatus.textContent = "Hike in progress.";
+        window.HikingSensor.startStepCounting();
+        liveData.hidden = false;
         timerId = window.setInterval(updateTimer, 1000);
         updateTimer();
     });
@@ -107,6 +115,7 @@
     finishButton.addEventListener("click", () => {
         if (!startedAt) return;
         window.clearInterval(timerId);
+        window.HikingSensor.stopStepCounting();
         const endedAt = new Date();
         const hike = {
             id: crypto.randomUUID(),
@@ -138,6 +147,7 @@
 
     function handleDisconnect() {
         startButton.disabled = true;
+        window.HikingSensor.stopStepCounting();
         if (startedAt) {
             window.clearInterval(timerId);
             timerId = undefined;
