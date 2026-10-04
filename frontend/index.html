@@ -1,157 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>Knee Impact Monitor</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn about Hiking Sensor, a wearable sensor project for monitoring hiking movement and impacts.">
+    <title>Hiking Sensor | Home</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chango&family=Clarity+City:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </head>
+<body class="home-page">
+    <header class="header-section">
+        <a href="index.html" class="header-section">Hiking Sensor</a>
+        <nav class="main-navigation">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <button type="button" class="nav-auth-button" data-open-auth>Sign in</button>
+        </nav>
+    </header>
 
-<body>
+    <main>
+        <section id="home" class="home-heading">
+            <h1 id="home-heading">Hiking Sensor</h1>
+            <p>A wearable sensor project for understanding movement and impacts while hiking.</p>
+            <a href="dashboard.html">Go to your hikes</a>
+        </section>
 
-<div class="container">
+        <section id="about" class="about-heading">
+            <h2 id="about-heading">About the project</h2>
+            <p>
+                Hiking Sensor uses an ESP32 and motion sensors to explore how the body moves
+                on the trail. The dashboard can display knee angle, acceleration, and detected
+                impacts in real time.
+            </p>
+        </section>
 
-  <h1>Knee Impact Monitor</h1>
-
-  <p id="status">
-    Not connected
-  </p>
-
-  <button id="connect">
-    Connect to ESP32
-  </button>
-
-
-  <!-- ==================================================
-       LIVE VALUES
-       ================================================== -->
-
-  <div class="section">
-
-    <h2>Live Sensor Data</h2>
-
-    <div class="data-grid">
-
-      <div class="data-box">
-        <span class="label">Knee angle:</span>
-        <span id="knee">0.00</span>°
-      </div>
-
-      <div class="data-box">
-        <span class="label">Acceleration:</span>
-        <span id="acceleration">0.000</span> g
-      </div>
-
-      <div class="data-box">
-        <span class="label">Impact acceleration:</span>
-        <span id="impact">0.000</span> g
-      </div>
-
-      <div class="data-box">
-        <span class="label">Impact detected:</span>
-        <span id="impactDetected">NO</span>
-      </div>
-
-      <div class="data-box">
-        <span class="label">Last impact knee angle:</span>
-        <span id="impactKnee">0.00</span>°
-      </div>
-
-      <div class="data-box">
-        <span class="label">Last impact strength:</span>
-        <span id="impactStrength">0.000</span> g
-      </div>
-
-    </div>
-
-  </div>
+        <section id="calculations" class="about-heading">
+            <h2 id="calculations-heading">Calculations</h2>
+            <p>
+               lalalalalala
+            </p>
+        </section>
+        <dialog id="sign-in" class="auth-dialog" aria-labelledby="sign-in-heading">
+            <section class="auth-card">
+                <div class="auth-dialog-heading">
+                    <h2 id="sign-in-heading">Sign in to Hiking Sensor</h2>
+                    <button type="button" class="dialog-close" data-close-auth aria-label="Close sign-in dialog">&times;</button>
+                </div>
+            <p>Sign in or create an account to view and record your hikes.</p>
+            <form id="login-form" class="form-stack">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" autocomplete="email" required>
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required>
+                <div class="form-actions">
+                    <button type="submit" name="auth-action" value="signin">Sign in</button>
+                    <button type="submit" name="auth-action" value="signup" class="button-secondary">Create account</button>
+                </div>
+                <p id="auth-message" class="notice" role="status" aria-live="polite"></p>
+            </form>
 
 
-  <!-- ==================================================
-       LAST FOOT STRIKE
-       ================================================== -->
-
-  <div class="section impact-card">
-
-    <h2>Last Foot Strike</h2>
-
-    <div class="large-value">
-      <span id="impactKneeLarge">--</span>°
-    </div>
-
-    <div>
-      Knee flexion at impact
-    </div>
-
-    <div class="large-value">
-      <span id="impactStrengthLarge">--</span> g
-    </div>
-
-    <div>
-      Impact acceleration
-    </div>
-
-  </div>
+            </section>
+        </dialog>
 
 
-  <!-- ==================================================
-       KNEE ANGLE GRAPH
-       ================================================== -->
+            <div id="signed-in" style="display:none">
+                <p>Signed in as <strong id="signed-in-email"></strong></p>
+                <a href="dashboard.html">Go to your hikes</a>
+                <button id="logout-btn" type="button" class="button-secondary">Sign out</button>
+            </div>
+        </section>
+    </main>
 
-  <div class="section">
+    <footer>
+        <p>Hiking Sensor</p>
+    </footer>
 
-    <h2>Live Knee Angle</h2>
-
-    <canvas
-      id="kneeGraph"
-      width="700"
-      height="250"
-    ></canvas>
-
-  </div>
-
-
-  <!-- ==================================================
-       IMPACT GRAPH
-       ================================================== -->
-
-  <div class="section">
-
-    <h2>Live Impact Acceleration</h2>
-
-    <canvas
-      id="impactGraph"
-      width="700"
-      height="250"
-    ></canvas>
-
-  </div>
-
-
-  <!-- ==================================================
-       SERIAL-STYLE OUTPUT
-       ================================================== -->
-
-  <div class="section">
-
-    <h2>Live Sensor Log</h2>
-
-    <div id="serialOutput">Waiting for sensor data...</div>
-
-  </div>
-
-</div>
-
-
-<script src="script.js" defer></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth.js" defer></script>
 </body>
-
 </html>

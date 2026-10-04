@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Review past hikes or start a new hike.">
+    <title>Your Hikes | Hiking Sensor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chango&family=Clarity+City:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+<body class="app-page" data-require-auth>
+    <header class="app-header">
+        <a class="brand" href="index.html">Hiking Sensor</a>
+        <nav class="app-navigation" aria-label="Main navigation">
+            <a href="index.html">Home</a>
+            <button type="button" class="text-button" data-sign-out hidden>Sign out</button>
+        </nav>
+    </header>
+    <main class="app-main">
+        <section class="page-intro">
+            <p class="eyebrow">Your activity</p>
+            <h1>Your hikes</h1>
+            <p id="account-message" class="muted">Your hike history is saved in this browser in this starter version.</p>
+        </section>
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <h2>Past hikes</h2>
+                    <p class="muted">Open a hike to review its details.</p>
+                </div>
+                <a class="button-link" href="new-hike.html">Start a new hike</a>
+            </div>
+            <p id="hike-list-message" class="notice" role="status" aria-live="polite"></p>
+            <div id="hike-list" class="hike-list"></div>
+        </section>
+    </main>
+    <!-- <script src="supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js" defer></script>
+    <script src="hike-store.js" defer></script>
+    <script src="dashboard.js" defer></script> -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="stats.js"></script>
+    <script src="hikeStorage.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
