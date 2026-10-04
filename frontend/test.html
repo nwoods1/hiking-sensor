@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Storage test</h2>
+  <button id="run">Save fake hike, then load it back</button>
+  <pre id="out"></pre>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="stats.js"></script>
+  <script src="hikeStorage.js"></script>
+  <script>
+    const out = document.getElementById('out');
+    const log = (...a) => out.textContent += a.map(x =>
+      typeof x === 'string' ? x : JSON.stringify(x, null, 2)).join(' ') + '\n';
+
+    function fakeHike(minutes = 30) {
+      const impacts = [];
+      for (let t = 0; t < minutes * 60000; t += 900 + Math.random() * 300) {
+        const fatigue = 1 + (t / (minutes * 60000)) * 0.3;   // impacts creep up over time
+        impacts.push({ t, accel: (1.5 + Math.random() * 1.5) * fatigue, angle: 10 + Math.random() * 25 });
+      }
+      return impacts;
+    }
+
+    document.getElementById('run').onclick = async () => {
+      out.textContent = '';
+      try {
+        // get a session without a login form
+        let { data: { session } } = await sb.auth.getSession();
+        if (!session) {
+          const { error } = await sb.auth.signInAnonymously();
+          if (error) throw error;
+          log('Signed in anonymously');
+        }
+
+        const impacts = fakeHike(30);
+        log('Generated', impacts.length, 'impacts');
+
+        const id = await saveHike(impacts, {
+          startedAt: Date.now(),
+          durationMs: 30 * 60000,
+          stepThreshold: 1.5,
+          highThreshold: 3.5,
+          name: 'Storage test',
+        });
+        log('Saved hike', id);
+
+        const { hike, impacts: loaded } = await loadHike(id);
+        log('Loaded back', loaded.length, 'impacts');
+        log('Round trip matches:', loaded.length === impacts.length);
+        log('Stats row:', { step_count: hike.step_count, avg_impact: hike.avg_impact,
+          max_impact: hike.max_impact, avg_cadence: hike.avg_cadence, fatigue_ratio: hike.fatigue_ratio });
+
+        log('Total hikes visible to me:', (await listHikes()).length);
+      } catch (e) {
+        log('ERROR:', e.message ?? e);
+        console.error(e);
+      }
+    };
+  </script>
+</body>
+</html>
