@@ -44,6 +44,14 @@ main {
   margin-inline: auto;
 }
 
+.app-page header,
+.app-page main,
+.app-page footer {
+  width: min(100% - 40px, 960px);
+  margin-inline: auto;
+}
+
+
 .home-page header {
   display: flex;
   align-items: center;
@@ -53,6 +61,11 @@ main {
 }
 
 .header-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-block: 24px;
   color: var(--text-color);
   font-size: 1.25rem;
   font-weight: 700;
@@ -531,7 +544,6 @@ footer p {
   margin-top: 12px;
 }
 
-.app-page button,
 .auth-card button,
 .button-link {
   display: inline-flex;
@@ -550,7 +562,6 @@ footer p {
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.app-page button:hover:not(:disabled),
 .auth-card button:hover:not(:disabled),
 .button-link:hover {
   transform: translateY(-1px);

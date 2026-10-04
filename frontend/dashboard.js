@@ -14,8 +14,6 @@
         window.location.href = "index.html#sign-in";
         return;
     }
-    signOutButton.hidden = false;
-    signOutButton.addEventListener("click", () => sb.auth.signOut());
 
     // NEW: leave the page if the user signs out (here or in another tab)
     sb.auth.onAuthStateChange((event) => {
