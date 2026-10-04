@@ -22,7 +22,7 @@
         <section class="page-intro">
             <p class="eyebrow">Your activity</p>
             <h1>Your hikes</h1>
-            <p id="account-message" class="muted">Your hike history is saved in this browser in this starter version.</p>
+            <p id="account-message" class="muted">Loading your account...</p>
         </section>
         <section class="panel">
             <div class="section-heading">
@@ -34,6 +34,14 @@
             </div>
             <p id="hike-list-message" class="notice" role="status" aria-live="polite"></p>
             <div id="hike-list" class="hike-list"></div>
+        </section>
+        <section id="hike-detail" class="panel" hidden>
+            <div class="section-heading">
+                <h2 id="detail-title">Hike details</h2>
+                <button type="button" id="detail-close" class="text-button">Close</button>
+            </div>
+            <div id="detail-stats" class="hike-list"></div>
+            <!-- the graph goes here next -->
         </section>
     </main>
     <!-- <script src="supabase-config.js"></script>
