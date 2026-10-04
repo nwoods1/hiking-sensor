@@ -21,16 +21,57 @@ app.get("/health", (req, res) => {
 });
 
 
+// The frontend sends the signed-in user's Supabase access token as
+// "Authorization: Bearer <token>". Verify it and return that user,
+// or null if it is missing or invalid.
+//
+// This server's SUPABASE_KEY is a secret key, which bypasses row level
+// security, so every hikes query MUST filter by the verified user's id.
+async function getRequestUser(req) {
+  const token = req.headers.authorization?.replace(/^Bearer\s+/i, "");
+
+  if (!token) {
+    return null;
+  }
+
+  const { data, error } =
+    await supabase.auth.getUser(token);
+
+  if (error) {
+    return null;
+  }
+
+  return data.user;
+}
+
+
+async function getUserHikes(userId) {
+  const { data, error } =
+    await supabase
+      .from("hikes")
+      .select("*")
+      .eq("user_id", userId)
+      .order("started_at", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+
 app.get("/hikes", async (req, res) => {
   try {
-    const { data, error } =
-      await supabase
-        .from("hikes")
-        .select("*");
+    const user = await getRequestUser(req);
 
-    if (error) {
-      throw error;
+    if (!user) {
+      return res.status(401).json({
+        error: "Sign in to see your hikes"
+      });
     }
+
+    const data = await getUserHikes(user.id);
 
     res.json(data);
 
@@ -54,14 +95,24 @@ app.post("/chat", async (req, res) => {
       });
     }
 
-    // Get hike data from Supabase
-    const { data: hikes, error } =
-      await supabase
-        .from("hikes")
-        .select("*");
+    const user = await getRequestUser(req);
 
-    if (error) {
-      throw error;
+    if (!user) {
+      return res.status(401).json({
+        error: "Sign in to ask about your hikes"
+      });
+    }
+
+    // Only the signed-in user's hikes. Drop ids/storage paths the
+    // model doesn't need.
+    const hikes = (await getUserHikes(user.id)).map(
+      ({ id, user_id, data_path, ...hike }) => hike
+    );
+
+    if (hikes.length === 0) {
+      return res.json({
+        answer: "You don't have any saved hikes yet. Record a hike and I can answer questions about it."
+      });
     }
 
     // Send question + hike data to Snowflake Cortex
