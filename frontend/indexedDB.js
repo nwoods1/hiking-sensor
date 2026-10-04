@@ -1,6 +1,9 @@
 
 const DB_NAME = "HikingDatabase";
-const DB_VERSION = 1;
+// Never lower this: browsers refuse to open a database at a version
+// below the one already stored (VersionError). Some browsers already
+// have v2 from earlier testing, so v2 is the minimum.
+const DB_VERSION = 2;
 
 const SESSION_STORE = "sessions";
 const READING_STORE = "readings";
