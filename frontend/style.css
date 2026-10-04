@@ -45,7 +45,7 @@ img {
 }
 
 .site-logo img {
-  width: clamp(64px, 10vw, 88px);
+  width: clamp(89px, 8vw, 88px);
   height: auto;
   object-fit: contain;
 }
