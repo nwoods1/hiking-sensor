@@ -122,55 +122,32 @@
 
     finishButton.addEventListener("click", async () => {
         if (!startedAt) return;
-        const hikeStartedAt = startedAt;
         startedAt = undefined;
         finished = true;
         finishButton.disabled = true;
         window.clearInterval(timerId);
-        const endedAt = new Date();
         const { sessionId } = await window.HikingSensor.stopStepCounting({ completed: true });
         if (device?.gatt?.connected) device.gatt.disconnect();
 
-        // Upload the IndexedDB recording to Supabase. If it fails, the
-        // session stays unsynced in IndexedDB and hike-sync.js retries it.
-        timerStatus.textContent = "Saving your hike…";
-        let remoteId = null;
-        let uploadError = null;
-        if (sessionId != null) {
-            try {
-                remoteId = await window.HikeSync.uploadSession(sessionId);
-            } catch (error) {
-                uploadError = error;
-                console.error("Could not upload hike:", error);
-            }
-        }
+        sessionStorage.removeItem("hiking-sensor-draft");
 
-        const hike = {
-            id: crypto.randomUUID(),
-            name: draft.name,
-            createdAt: draft.createdAt,
-            startedAt: hikeStartedAt.toISOString(),
-            endedAt: endedAt.toISOString(),
-            durationSeconds: Math.floor((endedAt - hikeStartedAt) / 1000),
-            sessionId,
-            remoteId
-        };
+        // Zip + upload the IndexedDB recording to Supabase (hike-sync.js ->
+        // saveHike). If it fails, the session stays unsynced in IndexedDB
+        // and is retried the next time a hike page opens.
+        timerStatus.textContent = "Saving your hike…";
         try {
-            window.HikeStore.saveHike(hike);
-            sessionStorage.removeItem("hiking-sensor-draft");
+            if (sessionId == null) throw new Error("nothing was recorded for this hike");
+            const hikeId = await window.HikeSync.uploadSession(sessionId);
+            // hike.html loads the hike from Supabase by its Supabase id.
+            window.location.href = `hike.html?id=${encodeURIComponent(hikeId)}`;
         } catch (error) {
-            timerStatus.textContent = `Could not save the hike: ${error.message}`;
-            return;
-        }
-        if (uploadError) {
+            console.error("Could not upload hike:", error);
             finishButton.hidden = true;
             timerStatus.textContent =
-                `Hike saved on this device, but uploading failed: ${uploadError.message}. ` +
+                `Hike saved on this device, but uploading failed: ${error.message}. ` +
                 "It will upload automatically the next time you start a hike.";
             timerStatus.classList.add("notice-error");
-            return;
         }
-        window.location.href = `hike.html?id=${encodeURIComponent(hike.id)}`;
     });
 
     function updateTimer() {

@@ -33,8 +33,24 @@
             <h1 id="detail-name">Hike</h1>
             <p id="detail-message" class="notice" role="status" aria-live="polite"></p>
             <dl id="hike-details" class="detail-grid"></dl>
-            <p class="muted">Sensor measurements can be added here when hike data recording is connected.</p>
-            <dl id="hike-details" class="detail-grid"></dl>
+        </section>
+
+        <section class="panel" id="step-charts-panel" hidden>
+            <h2>Every step</h2>
+            <p class="muted">Each point is one detected step from this hike's saved sensor data. Hover over a chart for details.</p>
+            <div id="step-charts-body">
+                <ul id="step-charts-legend" class="chart-legend"></ul>
+                <p id="bad-landing-summary" class="chart-summary"></p>
+                <figure class="chart">
+                    <figcaption>Impact acceleration</figcaption>
+                    <div id="impact-chart" class="chart-plot"></div>
+                </figure>
+                <figure class="chart">
+                    <figcaption>Knee angle at impact</figcaption>
+                    <div id="angle-chart" class="chart-plot"></div>
+                </figure>
+            </div>
+            <p id="step-charts-message" class="notice" role="status" aria-live="polite"></p>
         </section>
 
         <section class="panel" id="buckets-panel" hidden>
@@ -47,10 +63,6 @@
             <div class="table-wrap"><table id="per-minute-table"></table></div>
         </section>
 
-        <section class="panel" id="pauses-panel" hidden>
-            <h2>Pauses</h2>
-            <ul id="pause-list"></ul>
-        </section>
     </main>
    <footer>
       <p>Soft Step</p>
@@ -63,6 +75,7 @@
     <script src="supabase-config.js"></script>
     <script src="stats.js"></script>
     <script src="hikeStorage.js"></script>
+    <script src="hike-charts.js"></script>
     <script src="hike-detail.js"></script>
     <script src="auth.js" defer></script>
 </body>

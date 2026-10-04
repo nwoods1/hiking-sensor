@@ -1257,3 +1257,79 @@ app-page b
   }
 }
 
+/* ========================================
+   HIKE STEP CHARTS (hike-charts.js)
+   ======================================== */
+
+.chart {
+  margin: 24px 0 0;
+}
+
+.chart figcaption {
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.chart-plot {
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-plot svg {
+  display: block;
+}
+
+.chart-tooltip {
+  position: absolute;
+  z-index: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgb(58 60 68 / 12%);
+  color: var(--text-color);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.chart-tooltip-head {
+  font-weight: 700;
+}
+
+.chart-tooltip-flag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-swatch {
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.chart-summary {
+  margin: 8px 0 0;
+  font-weight: 700;
+}
