@@ -52,6 +52,11 @@ body {
   font-family: var(--header-font);
 }
 
+.header-section #signed-in {
+  font-family: var(--main-font);
+  font-size: 15px;
+}
+
 .main-navigation {
   display: flex;
   justify-content: center;
