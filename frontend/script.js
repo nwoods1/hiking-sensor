@@ -6,6 +6,7 @@ import {
 } from "./indexedDB.js";
 
 let kneeZeroOffset = 0;
+let kneeCalibrated = false;
 
 ("use strict");
 
@@ -216,6 +217,10 @@ async function stopActivity({ completed = false } = {}) {
 // =====================================================
 
 function resetProcessing() {
+
+  kneeZeroOffset = 0;
+  kneeCalibrated = false;
+
   thighAngle = 0;
   shinAngle = 0;
   kneeAngle = 0;
@@ -770,7 +775,23 @@ function handleSensorData(event) {
   // CALCULATE KNEE ANGLE
   // ====================================
 
-  const kneeAngle = calculateKneeAngle(thigh, shin, dt);
+  // Initialize the complementary filter
+calculateKneeAngle(thigh, shin, dt);
+
+// Automatically establish zero on the first valid reading
+if (!kneeCalibrated) {
+    calibrateKnee();
+    kneeCalibrated = true;
+
+    console.log("Automatic knee calibration completed.");
+}
+
+// Recalculate the knee angle using the calibrated offset
+const kneeAngle = Math.abs(
+    normalizeAngle(
+        normalizeAngle(thighAngle - shinAngle) - kneeZeroOffset
+    )
+);
 
   // ====================================
   // CALCULATE ACCELERATION
