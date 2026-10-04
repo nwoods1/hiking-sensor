@@ -23,7 +23,7 @@ const id = await saveHike(impacts, {
     durationMs: 30 * 60000,
     stepThreshold: 1.5,
     highThreshold: 3.5,
-    name: 'Test hike',
+    name: 'Another Test hike',
 });
 
 console.log(await loadHike(id));
