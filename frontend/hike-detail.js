@@ -80,13 +80,6 @@
         return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m`;
     }
 
-    function fatigueText(ratio) {
-        if (ratio == null) return "Not enough steps";
-        const pct = Math.round((ratio - 1) * 100);
-        if (pct === 0) return "No change";
-        return `${pct > 0 ? "+" : ""}${pct}% (last third vs first)`;
-    }
-
     function addDetail(label, value) {
         details.append(el("dt", null, label), el("dd", null, value));
     }
@@ -136,19 +129,12 @@
     addDetail("Total duration", longDuration(hike.duration_s));
     addDetail("Active time", longDuration(hike.active_time_s));
     addDetail("Steps", show(hike.step_count));
-    addDetail("Average cadence", show(hike.avg_cadence, " steps/min"));
-    addDetail("Peak cadence", show(hike.max_cadence, " steps/min"));
     addDetail("Average impact", show(hike.avg_impact));
-    addDetail("Median impact", show(hike.median_impact));
     addDetail("Hardest step", `${show(hike.max_impact)} at ${clock(hike.max_impact_at_s)}`);
     addDetail("Hard impacts", `${show(hike.high_impact_count)} (${show(hike.high_impact_pct, "%")})`);
-    addDetail("Total impact load", show(hike.total_impact_load));
-    addDetail("Fatigue", fatigueText(hike.fatigue_ratio));
     addDetail("Avg knee angle at impact", show(hike.avg_angle_at_impact, "\u00b0"));
     addDetail("Min knee angle at impact", show(hike.min_angle_at_impact, "\u00b0"));
     addDetail("Max knee angle at impact", show(hike.max_angle_at_impact, "\u00b0"));
-    addDetail("Step threshold", show(hike.step_threshold));
-    addDetail("High-impact threshold", show(hike.high_impact_threshold));
 
     // impact distribution: simple horizontal bars
     const buckets = hike.impact_buckets;
@@ -189,19 +175,6 @@
         }
         $("minutes-panel").hidden = false;
     }
-
-    // pauses
-    const pauseList = $("pause-list");
-    pauseList.replaceChildren();
-    const pauses = hike.pauses ?? [];
-    if (pauses.length === 0) {
-        pauseList.append(el("li", null, "No pauses detected."));
-    } else {
-        for (const p of pauses) {
-            pauseList.append(el("li", null, `At ${clock(p.start_s)} for ${clock(p.length_s)}`));
-        }
-    }
-    $("pauses-panel").hidden = false;
 
     // ---------- every-step charts from the zipped sensor file ----------
     // loadHikeImpacts (hikeStorage.js) downloads hike-data/<data_path> and
