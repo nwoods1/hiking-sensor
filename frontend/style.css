@@ -18,6 +18,14 @@ body {
   padding: 20px;
   margin: 0;
   color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; 
+  min-height: 100dvh; /* Modern dynamic viewport height fallback */
+}
+
+main {
+  flex: 1;
 }
 
 
@@ -143,11 +151,13 @@ body {
   font-family: var(--header-font);
 }
 
-.home-page footer {
+footer {
   padding-block: 16px 24px;
   border-top: 1px solid #dce5da;
   color: var(--text-color);
   font-size: 0.9rem;
+  width: min(100% - 40px, 960px);
+  margin-inline: auto;
 }
 
 .home-page footer p {
