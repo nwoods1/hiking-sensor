@@ -1,3 +1,21 @@
+const authDialog = document.getElementById("sign-in");
+const openAuthButton = document.querySelector("[data-open-auth]");
+const closeAuthButton = document.querySelector("[data-close-auth]");
+
+openAuthButton?.addEventListener("click", () => {
+  if (authDialog && !authDialog.open) authDialog.showModal();
+});
+
+closeAuthButton?.addEventListener("click", () => authDialog?.close());
+
+authDialog?.addEventListener("click", (event) => {
+  if (event.target === authDialog) authDialog.close();
+});
+
+if (window.location.hash === "#sign-in" && authDialog) {
+  authDialog.showModal();
+}
+
 // (() => {
 //     const config = window.HIKING_SENSOR_SUPABASE;
 //     const configured = Boolean(
