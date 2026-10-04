@@ -129,6 +129,27 @@
 
       try {
 
+        // The backend uses this token to answer about
+        // the signed-in user's hikes only.
+        const {
+          data: { session }
+        } = await sb.auth.getSession();
+
+
+        if (!session) {
+
+          addMessage(
+            "Please sign in first so I can look at your hikes.",
+            "assistant"
+          );
+
+          chatStatus.textContent =
+            "Not signed in";
+
+          return;
+        }
+
+
         const response =
           await fetch(
             CHAT_URL,
@@ -137,7 +158,10 @@
 
               headers: {
                 "Content-Type":
-                  "application/json"
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${session.access_token}`
               },
 
               body: JSON.stringify({
@@ -149,6 +173,20 @@
 
         const data =
           await response.json();
+
+
+        if (response.status === 401) {
+
+          addMessage(
+            "Your sign-in has expired. Please sign in again so I can look at your hikes.",
+            "assistant"
+          );
+
+          chatStatus.textContent =
+            "Not signed in";
+
+          return;
+        }
 
 
         if (!response.ok) {
