@@ -2,8 +2,13 @@
     // BACKEND
     // =====================================================
 
+    // Backend deployed on Render. To use a local backend while
+    // developing, change this to "http://localhost:3000".
+    const BACKEND_URL =
+      "https://hiking-sensor.onrender.com";
+
     const CHAT_URL =
-      "http://localhost:3000/chat";
+      `${BACKEND_URL}/chat`;
 
 
     // =====================================================
