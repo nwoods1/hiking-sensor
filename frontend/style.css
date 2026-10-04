@@ -54,11 +54,8 @@ body {
 
 .main-navigation {
   display: flex;
-<<<<<<< HEAD
   justify-content: center;
   align-items: center;
-=======
->>>>>>> 4244aec8dd92f93a5ee9300eba5e87791760e3b7
   gap: 20px;
 }
 
@@ -66,11 +63,8 @@ body {
   color: var(--text-color);
   font-weight: 600;
   text-decoration: none;
-<<<<<<< HEAD
   font-family: var(--main-font);
   font-size: 2vh;
-=======
->>>>>>> 4244aec8dd92f93a5ee9300eba5e87791760e3b7
 }
 
 .main-navigation a:hover,
@@ -264,7 +258,6 @@ body {
   }
 
   .dashboard-page .data-grid {
-<<<<<<< HEAD
     grid-template-columns: 1fr;
   }
 }
@@ -774,8 +767,6 @@ body {
 
   .live-data-grid,
   .live-data-grid .data-grid {
-=======
->>>>>>> 4244aec8dd92f93a5ee9300eba5e87791760e3b7
     grid-template-columns: 1fr;
   }
 }

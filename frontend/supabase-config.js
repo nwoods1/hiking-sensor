@@ -1,4 +1,4 @@
 window.HIKING_SENSOR_SUPABASE = {
-    url: "YOUR_SUPABASE_PROJECT_URL",
-    anonKey: "YOUR_SUPABASE_PUBLIC_ANON_KEY"
+    url: "SUPABASE_URL",
+    anonKey: "SUPABASE_KEY"
 };
