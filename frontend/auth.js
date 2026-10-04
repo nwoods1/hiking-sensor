@@ -8,6 +8,8 @@
   const form = document.getElementById("login-form");
   const message = document.getElementById("auth-message");
   const formButtons = form?.querySelectorAll('button[type="submit"]') ?? [];
+  const requiresAuth = document.body.hasAttribute("data-require-auth");
+  const protectedContent = requiresAuth ? document.querySelector("main") : null;
   let isSignedIn = false;
 
   function showMessage(text, isError = false) {
@@ -18,6 +20,13 @@
 
   function render(session) {
     isSignedIn = Boolean(session?.user && !session.user.is_anonymous);
+
+    if (requiresAuth && !isSignedIn) {
+      window.location.replace("index.html#sign-in");
+      return;
+    }
+
+    if (protectedContent) protectedContent.hidden = false;
 
     if (authButton) {
       authButton.textContent = isSignedIn ? "Sign out" : "Sign in";
@@ -102,16 +111,26 @@
     }
   });
 
-  if (typeof sb !== "undefined" && (authButton || form || hikesLink || accountLabel)) {
+  if (typeof sb !== "undefined" && (requiresAuth || authButton || form || hikesLink || accountLabel)) {
     sb.auth.onAuthStateChange((_event, session) => render(session));
     sb.auth.getSession().then(({ data, error }) => {
       if (error) {
+        if (requiresAuth) {
+          window.location.replace("index.html#sign-in");
+          return;
+        }
         showMessage(`Could not check sign-in status: ${error.message}`, true);
         return;
       }
       render(data.session);
     }).catch((error) => {
+      if (requiresAuth) {
+        window.location.replace("index.html#sign-in");
+        return;
+      }
       showMessage(`Could not check sign-in status: ${error.message}`, true);
     });
+  } else if (requiresAuth) {
+    window.location.replace("index.html#sign-in");
   }
 })();

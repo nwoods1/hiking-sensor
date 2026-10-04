@@ -5,7 +5,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Hiking Data Assistant</title>
+    <title>Soft Step Assistant | Soft Step</title>
 
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,11 +14,14 @@
       href="https://fonts.googleapis.com/css2?family=Chango&family=Clarity+City:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/x-icon" href="../assets/favicon/favicon.ico">
   </head>
 
-  <body class="home-page">
+  <body class="home-page" data-require-auth>
    <header class="header-section">
-      <a href="index.html" class="header-section">Soft Step</a>
+      <a href="index.html" class="site-logo" aria-label="Hiking Sensor home">
+        <img src="../assets/logo.png" alt="Hiking Sensor" />
+      </a>
       <nav class="main-navigation">
         <a href="#home">Home</a>
         <a href="#about">About</a>
@@ -30,9 +33,9 @@
       </nav>
     </header>
 
-    <main>
+    <main hidden>
       <section class="home-heading">
-        <h1>Hiking Data Assistant</h1>
+        <h1>Soft Step Assistant</h1>
 
         <p>
           Ask questions about your recorded hiking sessions, knee angles,
@@ -43,7 +46,7 @@
       <section class="chat-container">
         <div id="chatMessages" class="chat-messages">
           <div class="message assistant-message">
-            <div class="message-label">Hiking Assistant</div>
+            <div class="message-label">Soft Step Assistant</div>
 
             <!-- keep the text on one line: .message-content uses white-space: pre-wrap -->
             <div class="message-content">Hi! Ask me a question about your hiking data.</div>
@@ -99,8 +102,9 @@
       </section>
     </main>
 
-    <footer>
-      <p>Hiking Sensor</p>
+   <footer>
+      <p>Soft Step</p>
+      <p>Made by the Hacker Snackers <3</p>
       <span class="nav-account-label" data-account-label hidden>
         Signed in as <strong id="signed-in-email"></strong>
       </span>

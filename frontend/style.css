@@ -290,7 +290,7 @@ footer p {
 }
 
 .auth-dialog .dialog-close:hover {
-  background: var(--green2);
+  background: var(--secondary-color);
 }
 
 .nav-auth-button {
@@ -309,7 +309,7 @@ footer p {
 .nav-auth-button:hover,
 .nav-auth-button:focus-visible {
   transform: translateY(-0.5px);
-  background-color: var(--primary-color);
+  background-color: var(--secondary-color);
 }
 
 .app-page {
@@ -489,7 +489,7 @@ button {
 .button-link:hover,
 button:hover {
   transform: translateY(-1px);
-  background: var(--primary-color);
+  background: var(--secondary-color);
 }
 
 
@@ -1080,7 +1080,7 @@ app-page b
 
 .suggestion:hover,
 .suggestion:focus-visible {
-  background: var(--primary-color);
+  background: var(--secondary-color);
 }
 
 .chat-form {
@@ -1116,7 +1116,7 @@ app-page b
 
 .chat-form button:hover,
 .chat-form button:focus-visible {
-  background: var(--primary-color);
+  background: var(--secondary-color);
 }
 
 .chat-form button:disabled {
@@ -1144,6 +1144,116 @@ app-page b
 
   .chat-form button {
     width: 100%;
+  }
+}
+
+
+
+/* ========================================
+   FAQ SECTION
+   ======================================== */
+
+#faq {
+  padding: clamp(24px, 6vw, 56px);
+}
+
+/* Individual FAQ dropdown cards */
+#faq details {
+  margin-bottom: 12px;
+  padding: 0;
+
+  border: 1px solid var(--green);
+  border-radius: 12px;
+
+  background: var(--green2);
+  overflow: hidden;
+
+  transition: background-color 0.2s ease;
+}
+
+/* Clickable question */
+#faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 18px 22px;
+
+  color: var(--text-color);
+  font-family: var(--main-font);
+  font-size: 1.05rem;
+  font-weight: 700;
+
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Remove default dropdown arrow */
+#faq summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Custom dropdown indicator */
+#faq summary::after {
+  content: "+";
+  flex-shrink: 0;
+
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 400;
+
+  transition: transform 0.2s ease;
+}
+
+/* Change + into - when expanded */
+#faq details[open] summary::after {
+  content: "−";
+}
+
+/* Hover effect */
+#faq details:hover {
+  background: var(--green);
+}
+
+/* Expanded question */
+#faq details[open] {
+  background: #fff;
+  border-color: var(--primary-color);
+}
+
+#faq details[open] summary {
+  border-bottom: 2px solid var(--secondary-color);
+}
+
+/* Answer text */
+#faq details p {
+  max-width: 65ch;
+  margin: 0;
+  padding: 18px 22px;
+
+  color: var(--text-color);
+  font-family: var(--main-font);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* Keyboard accessibility */
+#faq summary:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: -3px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  #faq summary {
+    padding: 16px;
+    font-size: 0.95rem;
+  }
+
+  #faq details p {
+    padding: 16px;
+    font-size: 0.95rem;
   }
 }
 
