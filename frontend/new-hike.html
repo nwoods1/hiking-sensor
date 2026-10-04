@@ -32,9 +32,13 @@
             </form>
         </section>
     </main>
-    <script src="supabase-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="stats.js"></script>
+    <script src="hikeStorage.js"></script>
     <script src="auth.js" defer></script>
+    <!-- uploads any finished hikes that failed to upload earlier -->
+    <script type="module" src="hike-sync.js"></script>
     <script src="hike-flow.js" defer></script>
 </body>
 </html>

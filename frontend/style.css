@@ -54,11 +54,8 @@ body {
 
 .main-navigation {
   display: flex;
-<<<<<<< HEAD
-=======
   justify-content: center;
   align-items: center;
->>>>>>> d6b41abe6ccf3eb762da33d3cd03e78aa197128e
   gap: 20px;
 }
 
@@ -66,11 +63,8 @@ body {
   color: var(--text-color);
   font-weight: 600;
   text-decoration: none;
-<<<<<<< HEAD
-=======
   font-family: var(--main-font);
   font-size: 2vh;
->>>>>>> d6b41abe6ccf3eb762da33d3cd03e78aa197128e
 }
 
 .main-navigation a:hover,
