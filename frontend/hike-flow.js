@@ -12,6 +12,7 @@
     let device;
     let startedAt;
     let timerId;
+    let finished = false;
 
     if (form) {
         const createdAtField = document.getElementById("hike-created-at");
@@ -94,11 +95,19 @@
         }
     });
 
-    startButton.addEventListener("click", () => {
+    startButton.addEventListener("click", async () => {
         if (!device?.gatt?.connected) {
             showConnectionMessage("Connect to the ESP32 before starting the hike timer.", true);
             startButton.disabled = true;
             connectButton.disabled = false;
+            return;
+        }
+        startButton.disabled = true;
+        try {
+            await window.HikingSensor.startStepCounting({ name: draft.name });
+        } catch (error) {
+            timerStatus.textContent = `Could not start recording: ${error.message}`;
+            startButton.disabled = false;
             return;
         }
         startedAt = new Date();
@@ -106,33 +115,62 @@
         finishButton.hidden = false;
         connectButton.disabled = true;
         timerStatus.textContent = "Hike in progress.";
-        window.HikingSensor.startStepCounting();
         liveData.hidden = false;
         timerId = window.setInterval(updateTimer, 1000);
         updateTimer();
     });
 
-    finishButton.addEventListener("click", () => {
+    finishButton.addEventListener("click", async () => {
         if (!startedAt) return;
+        const hikeStartedAt = startedAt;
+        startedAt = undefined;
+        finished = true;
+        finishButton.disabled = true;
         window.clearInterval(timerId);
-        window.HikingSensor.stopStepCounting();
         const endedAt = new Date();
+        const { sessionId } = await window.HikingSensor.stopStepCounting({ completed: true });
+        if (device?.gatt?.connected) device.gatt.disconnect();
+
+        // Upload the IndexedDB recording to Supabase. If it fails, the
+        // session stays unsynced in IndexedDB and hike-sync.js retries it.
+        timerStatus.textContent = "Saving your hike…";
+        let remoteId = null;
+        let uploadError = null;
+        if (sessionId != null) {
+            try {
+                remoteId = await window.HikeSync.uploadSession(sessionId);
+            } catch (error) {
+                uploadError = error;
+                console.error("Could not upload hike:", error);
+            }
+        }
+
         const hike = {
             id: crypto.randomUUID(),
             name: draft.name,
             createdAt: draft.createdAt,
-            startedAt: startedAt.toISOString(),
+            startedAt: hikeStartedAt.toISOString(),
             endedAt: endedAt.toISOString(),
-            durationSeconds: Math.floor((endedAt - startedAt) / 1000)
+            durationSeconds: Math.floor((endedAt - hikeStartedAt) / 1000),
+            sessionId,
+            remoteId
         };
         try {
             window.HikeStore.saveHike(hike);
             sessionStorage.removeItem("hiking-sensor-draft");
-            if (device?.gatt?.connected) device.gatt.disconnect();
-            window.location.href = `hike.html?id=${encodeURIComponent(hike.id)}`;
         } catch (error) {
             timerStatus.textContent = `Could not save the hike: ${error.message}`;
+            return;
         }
+        if (uploadError) {
+            finishButton.hidden = true;
+            timerStatus.textContent =
+                `Hike saved on this device, but uploading failed: ${uploadError.message}. ` +
+                "It will upload automatically the next time you start a hike.";
+            timerStatus.classList.add("notice-error");
+            return;
+        }
+        window.location.href = `hike.html?id=${encodeURIComponent(hike.id)}`;
     });
 
     function updateTimer() {
@@ -146,6 +184,8 @@
     }
 
     function handleDisconnect() {
+        // Finishing the hike disconnects the sensor on purpose.
+        if (finished) return;
         startButton.disabled = true;
         window.HikingSensor.stopStepCounting();
         if (startedAt) {

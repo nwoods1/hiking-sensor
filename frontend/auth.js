@@ -18,12 +18,14 @@ if (window.location.hash === "#sign-in" && authDialog) {
 
 
 
+// The sign-in form only exists on index.html; other pages load
+// this file for the dialog/auth helpers and skip the form setup.
 const form = document.getElementById('login-form');
 const message = document.getElementById('auth-message');
 const signedInBox = document.getElementById('signed-in');
 const signedInEmail = document.getElementById('signed-in-email');
 const logoutBtn = document.getElementById('logout-btn');
-const formButtons = form.querySelectorAll('button');
+const formButtons = form ? form.querySelectorAll('button') : [];
 
 function show(text, isError = false) {
   message.textContent = text;
@@ -38,7 +40,7 @@ function render(session) {
   if (loggedIn) signedInEmail.textContent = session.user.email;
 }
 
-form.addEventListener('submit', async (e) => {
+form?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const action = e.submitter?.value;           // "signin" or "signup"
   const email = form.email.value.trim();
@@ -67,10 +69,12 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-logoutBtn.addEventListener('click', async () => {
+logoutBtn?.addEventListener('click', async () => {
   await sb.auth.signOut();
   show('');
 });
 
 // fires on page load (restoring any saved session) and on every login/logout
-sb.auth.onAuthStateChange((_event, session) => render(session));
+if (form) {
+  sb.auth.onAuthStateChange((_event, session) => render(session));
+}

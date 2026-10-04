@@ -35,7 +35,7 @@
             </div>
             <div class="form-actions">
                 <button id="start-hike" type="button" disabled>Start hike</button>
-                <button id="finish-hike" type="button" class="button-secondary" hidden>Finish hike</button>
+                <button id="finish-hike" type="button" class="button-secondary" hidden>End hike</button>
             </div>
         </section>
 
@@ -82,11 +82,14 @@
             </section>
         </section>
     </main>
-    <script src="supabase-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="stats.js"></script>
+    <script src="hikeStorage.js"></script>
     <script src="auth.js" defer></script>
     <script src="hike-store.js" defer></script>
-    <script src="script.js" defer></script>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="hike-sync.js"></script>
     <script src="hike-flow.js" defer></script>
 </body>
 </html>

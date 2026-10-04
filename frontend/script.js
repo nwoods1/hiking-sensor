@@ -6,6 +6,7 @@ import {
 } from "./indexedDB.js";
 
 let kneeZeroOffset = 0;
+let kneeCalibrated = false;
 
 ("use strict");
 
@@ -38,6 +39,9 @@ const FILTER_ALPHA = 0.98;
 const IMPACT_THRESHOLD = 0.8; // g
 const IMPACT_RESET_THRESHOLD = 0.35; // g
 const IMPACT_COOLDOWN = 300; // milliseconds
+
+// Impacts at or above this count as "hard" in the Supabase hike stats.
+const HIGH_IMPACT_THRESHOLD = 2.0; // g
 
 // Graph settings
 const MAX_POINTS = 250;
@@ -129,7 +133,8 @@ function createActivity() {
 // START ACTIVITY
 // =====================================================
 
-async function startActivity() {
+// details: optional info stored on the session, e.g. { name }.
+async function startActivity(details = {}) {
   // Prevent accidentally starting multiple sessions.
   if (activity.recording || activityStarting) {
     console.warn("Activity already running or starting.");
@@ -140,7 +145,13 @@ async function startActivity() {
 
   try {
     // Create the database session FIRST.
-    activeSessionId = await createSession();
+    // Thresholds are saved so the Supabase upload uses the
+    // values this hike was actually recorded with.
+    activeSessionId = await createSession({
+      ...details,
+      stepThreshold: IMPACT_THRESHOLD,
+      highThreshold: HIGH_IMPACT_THRESHOLD,
+    });
 
     // Reset activity statistics.
     activity = createActivity();
@@ -148,6 +159,8 @@ async function startActivity() {
     activity.startedAt = new Date().toISOString();
 
     resetProcessing();
+
+    updateStepCount();
 
     // Begin recording only after the database is ready.
     activity.recording = true;
@@ -169,7 +182,9 @@ async function startActivity() {
 // STOP ACTIVITY
 // =====================================================
 
-async function stopActivity() {
+// completed: true when the user finished the hike, which marks
+// the session for upload to Supabase.
+async function stopActivity({ completed = false } = {}) {
   if (!activity.recording) {
     return getActivitySummary();
   }
@@ -184,7 +199,7 @@ async function stopActivity() {
 
   try {
     if (sessionId !== null) {
-      await endSession(sessionId);
+      await endSession(sessionId, { completed });
       console.log("Database session ended:", sessionId);
     }
   } catch (error) {
@@ -194,7 +209,7 @@ async function stopActivity() {
   console.log("Activity stopped.");
   console.table(summary);
 
-  return summary;
+  return { ...summary, sessionId };
 }
 
 // =====================================================
@@ -202,6 +217,10 @@ async function stopActivity() {
 // =====================================================
 
 function resetProcessing() {
+
+  kneeZeroOffset = 0;
+  kneeCalibrated = false;
+
   thighAngle = 0;
   shinAngle = 0;
   kneeAngle = 0;
@@ -228,9 +247,30 @@ function resetProcessing() {
 // BLE CONNECTION
 // =====================================================
 
-connectButton.addEventListener("click", connectToESP32);
+// data.html: start recording as soon as the sensor connects.
+// hike-session.html uses window.HikingSensor instead (see bottom).
+connectButton?.addEventListener("click", async () => {
+  if (await connectToESP32()) {
+    await startActivity();
+  }
+});
 
+// Returns the connected device, or null if connecting failed.
 async function connectToESP32() {
+  if (new URLSearchParams(window.location.search).get("mockBluetooth") === "1") {
+    const device = createMockDevice();
+
+    device.addEventListener("gattserverdisconnected", () => {
+      statusText.textContent = "Disconnected";
+
+      stopActivity();
+    });
+
+    statusText.textContent = "Connected to Mock ESP32 (test mode)";
+
+    return device;
+  }
+
   try {
     statusText.textContent = "Searching for Bluetooth devices...";
 
@@ -242,13 +282,7 @@ async function connectToESP32() {
 
     statusText.textContent = "Connecting...";
 
-    const server = await device.gatt.connect();
-
-    const service = await server.getPrimaryService(SERVICE_UUID);
-
-    const characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
-
-    await characteristic.startNotifications();
+    const characteristic = await connectToSensorCharacteristic(device);
 
     characteristic.addEventListener("characteristicvaluechanged", (event) => {
       console.log("BLE packet received:", event.target.value);
@@ -263,12 +297,144 @@ async function connectToESP32() {
 
     statusText.textContent = "Connected to " + (device.name || "ESP32");
 
-    await startActivity();
+    return device;
   } catch (error) {
     console.error(error);
 
-    statusText.textContent = "Connection failed: " + error.message;
+    if (error.name === "NetworkError") {
+      statusText.textContent =
+        "Connection failed: the ESP32 keeps dropping the connection. " +
+        "Make sure no other phone or app is connected to it, restart it, and try again.";
+    } else if (error.name === "NotFoundError" && error.message.includes("Service")) {
+      statusText.textContent =
+        "Connection failed: that device isn't the hiking sensor. Pick the ESP32 from the list.";
+    } else {
+      statusText.textContent = "Connection failed: " + error.message;
+    }
+
+    return null;
   }
+}
+
+// =====================================================
+// CONNECT GATT WITH RETRIES
+// =====================================================
+
+// Chrome (especially on Windows) can drop the link right after
+// gatt.connect(), so service discovery fails with
+// "NetworkError: GATT Server is disconnected". Reconnecting
+// usually works, so retry a few times before giving up.
+
+const MAX_CONNECT_ATTEMPTS = 3;
+
+async function connectToSensorCharacteristic(device) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const server = await device.gatt.connect();
+
+      const service = await server.getPrimaryService(SERVICE_UUID);
+
+      const characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
+      await characteristic.startNotifications();
+
+      return characteristic;
+    } catch (error) {
+      if (error.name !== "NetworkError" || attempt >= MAX_CONNECT_ATTEMPTS) {
+        throw error;
+      }
+
+      console.warn(`Connection attempt ${attempt} failed, retrying:`, error);
+
+      statusText.textContent =
+        `Connection dropped, retrying (${attempt + 1}/${MAX_CONNECT_ATTEMPTS})...`;
+
+      if (device.gatt.connected) {
+        device.gatt.disconnect();
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+    }
+  }
+}
+
+// =====================================================
+// MOCK ESP32 (?mockBluetooth=1)
+// =====================================================
+
+// Sends 24-byte packets in the same format as the Arduino:
+// a walking leg at 1 step per second with a foot strike
+// on the shin at the start of each step.
+
+function createMockDevice() {
+  let connected = true;
+
+  const disconnectListeners = new Set();
+
+  const mockStart = performance.now();
+
+  const toRaw = (value, scale) => Math.round(value * scale);
+
+  const timer = setInterval(() => {
+    const t = (performance.now() - mockStart) / 1000;
+
+    const phase = 2 * Math.PI * t;
+
+    // Segment angles (deg) and their rates (deg/s).
+    const thighDeg = 15 * Math.sin(phase);
+    const thighRate = 15 * 2 * Math.PI * Math.cos(phase);
+
+    const shinDeg = thighDeg - 30 - 15 * Math.sin(phase + 1);
+    const shinRate = thighRate - 15 * 2 * Math.PI * Math.cos(phase + 1);
+
+    // Foot strike: short acceleration spike on the shin.
+    const strike = t % 1 < 0.05 ? 2.5 : 1;
+
+    const packet = new DataView(new ArrayBuffer(24));
+
+    const writeSensor = (offset, deg, rate, gravity) => {
+      const rad = deg / RAD_TO_DEG;
+
+      packet.setInt16(offset, 0, true);
+      packet.setInt16(offset + 2, toRaw(Math.sin(rad) * gravity, ACCEL_SCALE), true);
+      packet.setInt16(offset + 4, toRaw(Math.cos(rad) * gravity, ACCEL_SCALE), true);
+
+      packet.setInt16(offset + 6, toRaw(rate, GYRO_SCALE), true);
+      packet.setInt16(offset + 8, 0, true);
+      packet.setInt16(offset + 10, 0, true);
+    };
+
+    writeSensor(0, thighDeg, thighRate, 1);
+    writeSensor(12, shinDeg, shinRate, strike);
+
+    handleSensorData({ target: { value: packet } });
+  }, 20);
+
+  return {
+    name: "Mock ESP32",
+
+    gatt: {
+      get connected() {
+        return connected;
+      },
+
+      disconnect() {
+        if (!connected) return;
+
+        connected = false;
+
+        clearInterval(timer);
+
+        disconnectListeners.forEach((listener) => listener());
+      },
+    },
+
+    addEventListener(type, listener) {
+      if (type === "gattserverdisconnected") {
+        disconnectListeners.add(listener);
+      }
+    },
+  };
 }
 
 // =====================================================
@@ -509,6 +675,8 @@ function recordFootStrike(kneeAngle, impact, timestamp, swingAmplitude) {
 
   activity.maxImpact = Math.max(activity.maxImpact, impact);
 
+  updateStepCount();
+
   if (swingAmplitude !== null) {
     activity.swingAmplitudeSum += swingAmplitude;
 
@@ -516,6 +684,14 @@ function recordFootStrike(kneeAngle, impact, timestamp, swingAmplitude) {
   }
 
   console.log("Foot strike:", strike);
+}
+
+function updateStepCount() {
+  const stepCountElement = document.getElementById("step-count");
+
+  if (stepCountElement) {
+    stepCountElement.textContent = String(activity.totalSteps);
+  }
 }
 
 // =====================================================
@@ -599,7 +775,23 @@ function handleSensorData(event) {
   // CALCULATE KNEE ANGLE
   // ====================================
 
-  const kneeAngle = calculateKneeAngle(thigh, shin, dt);
+  // Initialize the complementary filter
+calculateKneeAngle(thigh, shin, dt);
+
+// Automatically establish zero on the first valid reading
+if (!kneeCalibrated) {
+    calibrateKnee();
+    kneeCalibrated = true;
+
+    console.log("Automatic knee calibration completed.");
+}
+
+// Recalculate the knee angle using the calibrated offset
+const kneeAngle = Math.abs(
+    normalizeAngle(
+        normalizeAngle(thighAngle - shinAngle) - kneeZeroOffset
+    )
+);
 
   // ====================================
   // CALCULATE ACCELERATION
@@ -891,6 +1083,20 @@ function drawGraph(canvas, ctx, values, markers, maxValue, unit) {
 drawGraph(kneeCanvas, kneeCtx, [], [], 120, "deg");
 
 drawGraph(impactCanvas, impactCtx, [], [], 3, "g");
+
+// =====================================================
+// API FOR THE HIKE SESSION PAGE (hike-flow.js)
+// =====================================================
+
+window.HikingSensor = {
+  connectToESP32,
+
+  // startStepCounting({ name }) -> IndexedDB session id
+  startStepCounting: startActivity,
+
+  // stopStepCounting({ completed: true }) when the user finishes
+  stopStepCounting: stopActivity,
+};
 
 // =====================================================
 // EXPOSE ACTIVITY FUNCTIONS FOR TESTING

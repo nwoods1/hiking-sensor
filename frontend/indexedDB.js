@@ -73,7 +73,11 @@ export function openDatabase() {
 // 2. CREATE HIKING SESSION
 // ======================================
 
-export async function createSession() {
+// Optional details are kept on the session so it can be
+// uploaded to Supabase later, e.g. if the first upload fails:
+// createSession({ name, stepThreshold, highThreshold })
+
+export async function createSession(details = {}) {
 
   const database = db || await openDatabase();
 
@@ -87,6 +91,8 @@ export async function createSession() {
     const store = transaction.objectStore(SESSION_STORE);
 
     const request = store.add({
+
+      ...details,
 
       startTime: Date.now(),
 
@@ -199,7 +205,11 @@ export async function getSessionReadings(sessionId) {
 // 5. END HIKING SESSION
 // ======================================
 
-export async function endSession(sessionId) {
+// completed: true when the user finished the hike on purpose.
+// Only completed sessions are uploaded to Supabase; a session
+// ended by a sensor disconnect is discarded by the hike flow.
+
+export async function endSession(sessionId, { completed = false } = {}) {
 
   const database = db || await openDatabase();
 
@@ -225,6 +235,8 @@ export async function endSession(sessionId) {
 
       session.endTime = Date.now();
 
+      session.completed = completed;
+
       const updateRequest = store.put(session);
 
       updateRequest.onsuccess = () => {
@@ -234,6 +246,114 @@ export async function endSession(sessionId) {
         resolve(session);
 
       };
+
+      updateRequest.onerror = () => reject(updateRequest.error);
+
+    };
+
+    request.onerror = () => reject(request.error);
+
+  });
+
+}
+
+
+// ======================================
+// 6. RETRIEVE A SESSION
+// ======================================
+
+export async function getSession(sessionId) {
+
+  const database = db || await openDatabase();
+
+  return new Promise((resolve, reject) => {
+
+    const transaction = database.transaction(
+      SESSION_STORE,
+      "readonly"
+    );
+
+    const store = transaction.objectStore(SESSION_STORE);
+
+    const request = store.get(sessionId);
+
+    request.onsuccess = () => resolve(request.result);
+
+    request.onerror = () => reject(request.error);
+
+  });
+
+}
+
+
+// ======================================
+// 7. FINISHED SESSIONS NOT YET IN SUPABASE
+// ======================================
+
+export async function getUnsyncedSessions() {
+
+  const database = db || await openDatabase();
+
+  return new Promise((resolve, reject) => {
+
+    const transaction = database.transaction(
+      SESSION_STORE,
+      "readonly"
+    );
+
+    const store = transaction.objectStore(SESSION_STORE);
+
+    const request = store.getAll();
+
+    request.onsuccess = () => resolve(
+      request.result.filter((session) =>
+        session.completed && session.endTime && !session.synced
+      )
+    );
+
+    request.onerror = () => reject(request.error);
+
+  });
+
+}
+
+
+// ======================================
+// 8. MARK SESSION AS UPLOADED
+// ======================================
+
+export async function markSessionSynced(sessionId, hikeId) {
+
+  const database = db || await openDatabase();
+
+  return new Promise((resolve, reject) => {
+
+    const transaction = database.transaction(
+      SESSION_STORE,
+      "readwrite"
+    );
+
+    const store = transaction.objectStore(SESSION_STORE);
+
+    const request = store.get(sessionId);
+
+    request.onsuccess = () => {
+
+      const session = request.result;
+
+      if (!session) {
+        reject(new Error("Session not found"));
+        return;
+      }
+
+      session.synced = true;
+
+      // Supabase hikes.id, for linking back to the uploaded hike.
+      session.hikeId = hikeId;
+
+      const updateRequest = store.put(session);
+
+      updateRequest.onsuccess = () => resolve(session);
 
       updateRequest.onerror = () => reject(updateRequest.error);
 
