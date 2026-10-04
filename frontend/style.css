@@ -545,7 +545,8 @@ footer p {
 }
 
 .auth-card button,
-.button-link {
+.button-link,
+button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -563,7 +564,8 @@ footer p {
 }
 
 .auth-card button:hover:not(:disabled),
-.button-link:hover {
+.button-link:hover,
+button:hover {
   transform: translateY(-1px);
   background: var(--primary-color);
 }
