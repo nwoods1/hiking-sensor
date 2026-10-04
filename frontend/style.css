@@ -28,6 +28,35 @@ main {
   flex: 1;
 }
 
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.site-logo {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 12px;
+  line-height: 0;
+  transition: transform 0.3s ease;
+}
+
+.site-logo img {
+  width: clamp(64px, 10vw, 88px);
+  height: auto;
+  object-fit: contain;
+}
+
+.site-logo:focus-visible,
+.site-logo:hover {
+  outline: 3px solid var(--secondary-border);
+  outline-offset: 5px;
+  transform: translateY(-1.5px);
+}
+
 
 .home-page {
   min-height: 100vh;
@@ -96,6 +125,7 @@ main {
 .main-navigation a:hover,
 .main-navigation a:focus-visible {
   text-decoration: underline;
+  text-decoration-color: var(--secondary-color);
 }
 
 .nav-account-label {
@@ -151,17 +181,20 @@ main {
   color: var(--text-color);
   font-weight: 700;
   text-decoration: none;
+  transition: background-color 0.3s ease;
 }
 
 .home-heading a:hover,
 .home-heading a:focus-visible {
-  background-color: var(--primary-color);
+  background-color: var(--secondary-color);
 }
 
 .about-heading h2 {
   margin-top: 0;
   color: var(--text-color);
   font-family: var(--header-font);
+  border-bottom: 3px solid var(--secondary-color);
+  padding-bottom: 10px;
 }
 
 footer {
@@ -195,120 +228,6 @@ footer p {
   }
 }
 
-.dashboard-page {
-  min-height: 100vh;
-  padding: 32px 20px;
-  background: var(--background-color);
-  color: var(--text-color);
-  text-align: left;
-  font-family: var(--main-font);
-}
-
-.dashboard-page .container {
-  width: min(100%, 960px);
-  margin-inline: auto;
-}
-
-.dashboard-page h1,
-.dashboard-page h2 {
-  color: var(--text-color);
-  font-family: var(--header-font);
-  font-weight: 400;
-}
-
-.dashboard-page h1 {
-  margin: 0 0 16px;
-  font-size: clamp(2rem, 6vw, 3rem);
-}
-
-.dashboard-page h2 {
-  margin-top: 40px;
-  font-size: 1.35rem;
-}
-
-.dashboard-page #status {
-  display: inline-block;
-  padding: 8px 12px;
-  border: 1px solid var(--green);
-  border-radius: 999px;
-  background: #fff;
-}
-
-.dashboard-page button {
-  border: 0;
-  border-radius: 999px;
-  background: var(--accent-color);
-  color: var(--text-color);
-  font-family: var(--main-font);
-  font-weight: 700;
-  padding: 10px;
-  transition: transform 0.3s ease, background 0.3s;
-}
-
-.dashboard-page button:hover,
-.dashboard-page button:focus-visible {
-  background: var(--primary-color);
-  transform: translateY(-0.5px);
-
-}
-
-.dashboard-page .section {
-  margin-bottom: 0;
-  border-radius: 16px;
-}
-
-.dashboard-page .data-box {
-  background: var(--green2);
-  border: 1px solid #dce5da;
-  border-radius: 16px;
-  line-height: 1.6;
-  padding: 2%;
-  border-radius: 5px;
-  margin-top: 5px;
-  transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-.dashboard-page .data-box:hover {
-  transform: translateY(-1.5px);
-  background-color: var(--green);
-
-}
-
-.dashboard-page .label {
-  color: var(--text-color);
-}
-
-.dashboard-page .impact-card {
-  margin-top: 10px;
-}
-
-.dashboard-page .large-value {
-  color: var(--primary-color);
-}
-
-.dashboard-page canvas {
-  display: block;
-  border: 2px solid var(--green2);
-  border-radius: 5px;
-}
-
-.dashboard-page #serialOutput {
-  height: 260px;
-  border: 2px solid var(--green2);
-  line-height: 1.5;
-  padding-top: 2%;
-  padding-left: 2%;
-}
-
-@media (max-width: 600px) {
-  .dashboard-page {
-    padding: 24px 16px;
-  }
-
-  .dashboard-page .data-grid {
-    grid-template-columns: 1fr;
-  }
-}
 
 .auth-card {
   width: min(100%, 520px);
@@ -437,6 +356,7 @@ footer p {
 .app-navigation a:hover,
 .back-link:hover {
   text-decoration: underline;
+  text-decoration-color: var(--secondary-color);
 }
 
 .app-main {
@@ -460,6 +380,8 @@ footer p {
 
 .page-intro h1 {
   margin-bottom: 8px;
+  border-bottom: 3px solid var(--secondary-color);
+  padding-bottom: 10px;
 }
 
 .eyebrow {
@@ -702,40 +624,7 @@ button:hover {
   color: #9a352c !important;
 }
 
-.hike-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  gap: 14px;
-}
 
-.hike-card {
-  display: block;
-  padding: 18px;
-  border: 1px solid var(--green);
-  border-radius: 12px;
-  background: var(--green2);
-  color: var(--text-color);
-  text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.hike-card:hover,
-.hike-card:focus-visible {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgb(58 60 68 / 10%);
-}
-
-.hike-card h3 {
-  margin: 0 0 10px;
-  color: #355b43;
-  font-family: var(--header-font);
-  font-size: 1rem;
-  font-weight: 400;
-}
-
-.hike-card p {
-  margin: 6px 0;
-}
 
 .connection-panel,
 .timer-panel {
@@ -869,6 +758,7 @@ button:hover {
 .app-navigation a:hover,
 .back-link:hover {
   text-decoration: underline;
+  text-decoration-color: var(--secondary-color);
 }
 
 .app-main {
@@ -1034,7 +924,7 @@ app-page b
 
 .hike-card h3 {
   margin: 0 0 10px;
-  color: #355b43;
+  color: var(--primary-color);
   font-family: var(--header-font);
   font-size: 1rem;
   font-weight: 400;
